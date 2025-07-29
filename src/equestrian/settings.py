@@ -12,6 +12,7 @@ load_dotenv()
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 DEBUG = os.environ.get('DJANGO_DEBUG')
 ALLOWED_HOSTS = [os.environ.get('DJANGO_ALLOWED_HOST')]
+CSRF_TRUSTED_ORIGINS = [os.environ.get('DJANGO_ALLOWED_HOST')]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
