@@ -43,3 +43,69 @@
 | **Инфраструктура** | [![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/) [![Docker Compose](https://img.shields.io/badge/Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/) |
 | **Стиль кода** | [![PEP8](https://img.shields.io/badge/PEP8-794013?style=for-the-badge)](https://www.docker.com/) |
 
+## 🚀 Запуск проекта
+
+### 1. Клонирование проекта
+```bash
+git clone https://github.com/igor-526/EqUniAPI
+cd EqUniAPI
+```
+
+### 2. Настройка окружения
+
+Создайте файл `.env` в корне проекта на основе примера `example.env`:
+
+```ini
+# ========================
+# Настройки Django
+# ========================
+DJANGO_SETTINGS_MODULE='equestrian.settings'    # путь к настройкам
+DJANGO_SECRET_KEY='django-insecure'             # Секретный ключ Django
+DJANGO_DEBUG="1"                                # режим Debug ("" для production)
+DJANGO_ALLOWED_HOST="*"                         # домен/IP
+DB_HOST=eq_database                             # хост БД
+DB_PORT=5432                                    # порт БД
+GUNICORN_PORT=5050                              # порт для открытия Gunicorn
+
+# ========================
+# Настройки проекта
+# ========================
+ALLOW_DOCUMENTATION="1"                         # доступ к документации ("" для закрытия)
+ACCESS_TOKEN_LIFETIME_HOURS=23                  # количество часов жизни access токена
+REFRESH_TOKEN_LIFETIME_DAYS=30                  # количество дней жизни refresh токена
+
+# ========================
+# Настройки БД
+# ========================
+DB_DB=eq_development                            # Имя БД
+DB_USER=eq_development                          # Имя пользователя
+DB_PASSWORD=eq_development                      # Пароль БД
+DB_PORT_FORWARD=5436                            # Порт для внешних подключений
+```
+
+### 4. Запуск
+```bash
+docker compose up -d
+```
+
+### 5. Создание пользователя
+```bash
+docker compose exec eq_django bash
+uv run python manage.py createsuperuser
+
+*Следуйте инструкциям
+
+exit
+```
+
+### 6. Создание лошадей (при необходимости)
+```bash
+docker compose exec eq_django bash
+uv run python manage.py generate_horse -c 100   # -c --count : количество фейковых лошадей
+exit
+```
+
+## Документация API
+Документация будет доступна при переходе на **{host}/doc/** после запуска проекта.
+
+Проверьте параметр **ALLOW_DOCUMENTATION** в .env файле
