@@ -1,0 +1,25 @@
+[project]
+name = "aleksandrova-dacha"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.13"
+dependencies = [
+    "django>=5.2.4",
+    "djangorestframework>=3.16.0",
+    "djangorestframework-jwt>=1.11.0",
+    "djangorestframework-simplejwt>=5.5.1",
+    "notebook>=7.4.4",
+    "pillow>=11.3.0",
+    "python-dotenv>=1.1.1",
+]
+
+[dependency-groups]
+dev = [
+    "flake8>=7.3.0",
+    "flake8-import-order>=0.19.2",
+    "psycopg2>=2.9.10",
+]
+prod = [
+    "gunicorn>=23.0.0",
+    "psycopg2-binary>=2.9.10",
+]

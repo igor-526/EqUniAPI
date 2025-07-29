@@ -1,0 +1,41 @@
+volumes:
+  eq_pgdata:
+
+services:
+  eq_django:
+    build: .
+    ports:
+      - "${GUNICORN_PORT}:5000"
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DJANGO_DEBUG: ${DJANGO_DEBUG}
+      DJANGO_ALLOWED_HOST: ${DJANGO_ALLOWED_HOST}
+      DB_HOST: ${DB_HOST}
+      DB_DB: ${DB_DB}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_PORT: ${DB_PORT}
+      ALLOW_DOCUMENTATION: ${ALLOW_DOCUMENTATION}
+      ACCESS_TOKEN_LIFETIME_HOURS: ${ACCESS_TOKEN_LIFETIME_HOURS}
+      REFRESH_TOKEN_LIFETIME_DAYS: ${REFRESH_TOKEN_LIFETIME_DAYS}
+      PYTHONUNBUFFERED: 1
+    entrypoint: bash -c  "uv run python manage.py collectstatic --noinput && uv run python manage.py migrate && uv run gunicorn --bind 0.0.0.0:5000 equestrian.wsgi:application";
+    volumes:
+      - ./src/media:/src/media
+      - ./src/static:/src/static
+    depends_on:
+      - eq_database
+    restart: always
+
+  eq_database:
+    image: postgres:latest
+    ports:
+      - "${DB_PORT_FORWARD}:5432"
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DB}
+      POSTGRES_HOST: localhost
+    volumes:
+      - eq_pgdata:/var/lib/postgresql/data
+    restart: always

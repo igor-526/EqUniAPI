@@ -1,0 +1,952 @@
+[
+  {
+    "name": "Пользователи",
+    "values": [],
+    "endpoints": [
+      {
+        "name": "Получение JWT токена",
+        "codename": "getjwt",
+        "endpoint": "auth/token/",
+        "method": "post",
+        "description": "Служит для получения JWT токена авторизации пользователя на сервере",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data"
+          }
+        ],
+        "body": [
+          {
+            "name": "username",
+            "type": "String [Required]",
+            "description": "логин пользователя",
+            "example": "user1"
+          },
+          {
+            "name": "password",
+            "type": "String [Required]",
+            "description": "пароль пользователя",
+            "example": "superpassword"
+          }
+        ],
+        "responses": [
+          {
+            "name": "200 OK",
+            "examples": [
+              {
+                "refresh": "{refresh_token}",
+                "access": "{access_token}"
+              }
+            ]
+          },
+          {
+            "name": "400 Bad Request",
+            "examples": [
+              {
+                "password": ["Это поле обязательно."]
+              }
+            ]
+          },
+          {
+            "name": "401 Unauthorized",
+            "examples": [
+              {
+                "detail": "No active account found with the given credentials"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Обновление access токена",
+        "codename": "reshreshtoken",
+        "endpoint": "auth/token/refresh",
+        "method": "post",
+        "description": "Служит для обновления access токена пользователя на сервере",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data"
+          }
+        ],
+        "body": [
+          {
+            "name": "refresh",
+            "type": "String [Required]",
+            "description": "refresh токен полученный в запросе получения JWT токена",
+            "example": "{refresh_token}"
+          }
+        ],
+        "responses": [
+          {
+            "name": "200 OK",
+            "examples": [
+              {
+                "access": "{access_token}"
+              }
+            ]
+          },
+          {
+            "name": "400 Bad Request",
+            "examples": [
+              {
+                "password": ["Это поле обязательно."]
+              }
+            ]
+          },
+          {
+            "name": "401 Unauthorized",
+            "examples": [
+              {
+                "detail": "Token is invalid",
+                "code": "token_not_valid"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Верификация токена",
+        "codename": "verifytoken",
+        "endpoint": "auth/token/refresh",
+        "method": "post",
+        "description": "Служит для верификации access или refresh токена",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data"
+          }
+        ],
+        "body": [
+          {
+            "name": "token",
+            "type": "String [Required]",
+            "description": "access или refresh токен полученный в запросе получения JWT токена",
+            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUz..."
+          }
+        ],
+        "responses": [
+          {
+            "name": "200 OK"
+          },
+          {
+            "name": "401 Unauthorized",
+            "examples": [
+              {
+                "detail": "Token is invalid",
+                "code": "token_not_valid"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Информация о пользователе",
+        "codename": "userinfo",
+        "endpoint": "auth/user/{id [Optional]}/",
+        "method": "get",
+        "description": "Получение информации о пользователе и его правах (не указывайте id для получения информации о самом себе)",
+        "headers": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {access_token}"
+          }
+        ],
+        "responses": [
+          {
+            "name": "200 OK",
+            "examples": [
+              {
+                "first_name": "Moderator",
+                "last_name": "Moderator",
+                "patronymic": "Moderator",
+                "photo": "http://localhost:8009/media/profile_photos/base_avatar.png",
+                "permissions": [
+                  "horses.change_horse"
+                ],
+                "groups": [
+                  "Модераторы лошадей"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "401 Unauthorized",
+            "examples": [
+              {
+                "detail": "Учетные данные не были предоставлены."
+              },
+              {
+                "detail": "Given token not valid for any token type",
+                "code": "token_not_valid",
+                "messages": [
+                  {
+                    "token_class": "AccessToken",
+                    "token_type": "access",
+                    "message": "Token is invalid"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "404 Not Found",
+            "examples": [
+              {
+                "detail": "Пользователь не найден"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Лошади",
+    "values": [
+      {
+        "name": "sex",
+        "description": "пол лошади",
+        "values": [
+          {
+            "key": "0",
+            "value": "Кобыла"
+          },
+          {
+            "key": "1",
+            "value": "Жеребец"
+          },
+          {
+            "key": "2",
+            "value": "Мерин"
+          }
+        ]
+      },
+      {
+        "name": "bdate_mode",
+        "description": "режим даты рождения лошади",
+        "values": [
+          {
+            "key": "0",
+            "value": "Полная дата"
+          },
+          {
+            "key": "1",
+            "value": "Только год"
+          },
+          {
+            "key": "2",
+            "value": "Год и месяц"
+          }
+        ]
+      },
+      {
+        "name": "ddate_mode",
+        "description": "режим даты смерти лошади",
+        "values": [
+          {
+            "key": "0",
+            "value": "Полная дата"
+          },
+          {
+            "key": "1",
+            "value": "Только год"
+          },
+          {
+            "key": "2",
+            "value": "Год и месяц"
+          }
+        ]
+      }
+    ],
+    "endpoints": [
+      {
+        "name": "Все лошади",
+        "codename": "allhorses",
+        "endpoint": "horse/",
+        "method": "get",
+        "description": "Список всех лошадей",
+        "permission": "horses.change_horse (для получения расширенной информации)",
+        "headers": [
+          {
+            "key": "Authorization [Optional]",
+            "value": "Bearer {access_token}"
+          }
+        ],
+        "query_params": [
+          {
+            "name": "name",
+            "type": "String [Optional]",
+            "description": "Кличка лошади (фильтр)",
+            "example": "Юпитер"
+          },
+          {
+            "name": "sex",
+            "type": "List[Integer (0 | 1 | 2)] [Optional]",
+            "description": "Пол лошади (фильтр)",
+            "example": "2"
+          },
+          {
+            "name": "bdate_year_start",
+            "type": "Integer [Format: YYYY] [Optional]",
+            "description": "Дата рождения от (фильтр)",
+            "example": "1990"
+          },
+          {
+            "name": "bdate_year_end",
+            "type": "Integer [Format: YYYY] [Optional]",
+            "description": "Дата рождения до (фильтр)",
+            "example": "1990"
+          },
+          {
+            "name": "ddate_year_start",
+            "type": "Integer [Format: YYYY] [Optional]",
+            "description": "Дата смерти от (фильтр)",
+            "example": "1990"
+          },
+          {
+            "name": "ddate_year_end",
+            "type": "Integer [Format: YYYY] [Optional]",
+            "description": "Дата смерти до (фильтр)",
+            "example": "1990"
+          },
+          {
+            "name": "breed",
+            "type": "List[Integer(ID) | String] [Optional]",
+            "description": "Порода (фильтр)",
+            "example": "1 | Будёновская"
+          },
+          {
+            "name": "description",
+            "type": "String [Optional]",
+            "description": "Описание",
+            "example": "Безупречный аллюр"
+          },
+          {
+            "name": "has_photo",
+            "type": "String ['true'|'false']",
+            "description": "Наличие фотографий",
+            "example": "true"
+          },
+          {
+            "name": "children_count",
+            "type": "Integer",
+            "description": "Количество детей (-1: >0)",
+            "example": "0"
+          },
+          {
+            "name": "limit",
+            "type": "Integer | max=50 [Default=50]",
+            "description": "Количество записей",
+            "example": "20"
+          },
+          {
+            "name": "offset",
+            "type": "Integer [Default=0]",
+            "description": "Отступ записей",
+            "example": "20"
+          }
+
+        ],
+        "sorting": [
+          {
+            "name": "name",
+            "description": "Кличка"
+          },
+          {
+            "name": "sex",
+            "description": "Пол"
+          },
+          {
+            "name": "breed",
+            "description": "Порода"
+          },
+          {
+            "name": "bdate",
+            "description": "Дата рождения"
+          },
+          {
+            "name": "ddate",
+            "description": "Дата смерти"
+          },
+          {
+            "name": "created_at",
+            "description": "Дата создания записи"
+          }
+        ],
+        "responses": [
+          {
+            "name": "200 OK (Авторизован с правом 'horses.change_horse')",
+            "examples": [
+              [
+                {
+                  "id": 15,
+                  "name": "Буря",
+                  "breed": {
+                    "id": 4,
+                    "name": "Ганноверская"
+                  },
+                  "sex": 0,
+                  "bdate": "1973-03-07",
+                  "ddate": null,
+                  "description": "Любит долгие прогулки",
+                  "children": [
+                    {
+                      "id": 47,
+                      "name": "Ульф",
+                      "breed": {
+                        "id": 3,
+                        "name": "Аппалуза"
+                      },
+                      "sex": 1,
+                      "bdate_formatted": "1972",
+                      "ddate_formatted": "1992",
+                      "description": "Неутомимый труженик",
+                      "age": 20
+                    }
+                  ],
+                  "bdate_mode": 2,
+                  "ddate_mode": 1,
+                  "mother": null,
+                  "father": null,
+                  "created_at": "2025-07-25T12:09:09.275123+03:00",
+                  "created_by": null,
+                  "age": 52,
+                  "bdate_formatted": "1973",
+                  "ddate_formatted": null,
+                  "photos": []
+                },
+                {
+                  "id": 16,
+                  "name": "Гроза",
+                  "breed": {
+                    "id": 5,
+                    "name": "Фризская"
+                  },
+                  "sex": 0,
+                  "bdate": "1990-06-26",
+                  "ddate": null,
+                  "description": "Золотистая, как солнце",
+                  "children": [],
+                  "bdate_mode": 1,
+                  "ddate_mode": 1,
+                  "mother": null,
+                  "father": null,
+                  "created_at": "2025-07-25T12:09:09.284454+03:00",
+                  "created_by": null,
+                  "age": 35,
+                  "bdate_formatted": "06.1990",
+                  "ddate_formatted": null,
+                  "photos": []
+                }
+              ]
+            ]
+          },
+          {
+            "name": "200 OK (Не авторизован или авторизован без права 'horses.change_horse')",
+            "examples": [
+              [
+                {
+                  "id": 15,
+                  "name": "Буря",
+                  "breed": {
+                    "id": 4,
+                    "name": "Ганноверская"
+                  },
+                  "sex": 0,
+                  "description": "Любит долгие прогулки",
+                  "mother": null,
+                  "father": null,
+                  "children": [
+                    {
+                      "id": 47,
+                      "name": "Ульф",
+                      "breed": {
+                        "id": 3,
+                        "name": "Аппалуза"
+                      },
+                      "sex": 1,
+                      "bdate_formatted": "1972",
+                      "ddate_formatted": "1992",
+                      "description": "Неутомимый труженик",
+                      "age": 20
+                    }
+                  ],
+                  "age": 52,
+                  "bdate_formatted": "1973",
+                  "ddate_formatted": null,
+                  "photos": []
+                },
+                {
+                  "id": 16,
+                  "name": "Гроза",
+                  "breed": {
+                    "id": 5,
+                    "name": "Фризская"
+                  },
+                  "sex": 0,
+                  "description": "Золотистая, как солнце",
+                  "mother": null,
+                  "father": null,
+                  "children": [],
+                  "age": 35,
+                  "bdate_formatted": "06.1990",
+                  "ddate_formatted": null,
+                  "photos": []
+                }
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Одна лошадь",
+        "codename": "onehorses",
+        "endpoint": "horse/{id}/",
+        "method": "get",
+        "description": "Данные о конкретной лошади",
+        "permission": "horses.change_horse (для получения расширенной информации)",
+        "headers": [
+          {
+            "key": "Authorization [Optional]",
+            "value": "Bearer {access_token}"
+          }
+        ],
+        "responses": [
+          {
+            "name": "200 OK (Авторизован с правом 'horses.change_horse')",
+            "examples": [
+              {
+                "id": 15,
+                "name": "Буря",
+                "breed": {
+                  "id": 4,
+                  "name": "Ганноверская"
+                },
+                "sex": 0,
+                "bdate": "1973-03-07",
+                "ddate": null,
+                "description": "Любит долгие прогулки",
+                "children": [
+                  {
+                    "id": 47,
+                    "name": "Ульф",
+                    "breed": {
+                      "id": 3,
+                      "name": "Аппалуза"
+                    },
+                    "sex": 1,
+                    "bdate_formatted": "1972",
+                    "ddate_formatted": "1992",
+                    "description": "Неутомимый труженик",
+                    "age": 20
+                  }
+                ],
+                "bdate_mode": 2,
+                "ddate_mode": 1,
+                "mother": null,
+                "father": null,
+                "created_at": "2025-07-25T12:09:09.275123+03:00",
+                "created_by": null,
+                "age": 52,
+                "bdate_formatted": "1973",
+                "ddate_formatted": null,
+                "photos": []
+              }
+            ]
+          },
+          {
+            "name": "200 OK (Не авторизован или авторизован без права 'horses.change_horse')",
+            "examples": [
+              {
+                "id": 15,
+                "name": "Буря",
+                "breed": {
+                  "id": 4,
+                  "name": "Ганноверская"
+                },
+                "sex": 0,
+                "description": "Любит долгие прогулки",
+                "mother": null,
+                "father": null,
+                "children": [
+                  {
+                    "id": 47,
+                    "name": "Ульф",
+                    "breed": {
+                      "id": 3,
+                      "name": "Аппалуза"
+                    },
+                    "sex": 1,
+                    "bdate_formatted": "1972",
+                    "ddate_formatted": "1992",
+                    "description": "Неутомимый труженик",
+                    "age": 20
+                  }
+                ],
+                "age": 52,
+                "bdate_formatted": "1973",
+                "ddate_formatted": null,
+                "photos": []
+              }
+            ]
+          },
+          {
+            "name": "404 Not Found",
+            "examples": [
+              {
+                "detail": "No Horse matches the given query."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Добавление лошади",
+        "codename": "addhorse",
+        "endpoint": "horse/",
+        "method": "post",
+        "description": "Добавление новой лошади",
+        "permission": "horses.change_horse",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {access_token}"
+          }
+        ],
+        "body": [
+          {
+            "name": "name",
+            "type": "String | max=50 [Required]",
+            "description": "Кличка лошади",
+            "example": "Юпитер"
+          },
+          {
+            "name": "sex",
+            "type": "Integer (0 | 1 | 2) [Optional] [Default: 0]",
+            "description": "Пол лошади",
+            "example": "2"
+          },
+          {
+            "name": "bdate",
+            "type": "Date [Optional] [Format: YYYY-MM-DD]",
+            "description": "Дата рождения",
+            "example": "2000-03-29"
+          },
+          {
+            "name": "bdate_mode",
+            "type": "Integer (0 | 1 | 2) [Optional] [Default: 0]",
+            "description": "Режим даты рождения",
+            "example": "2"
+          },
+          {
+            "name": "ddate",
+            "type": "Date [Optional] [Format: YYYY-MM-DD]",
+            "description": "Дата смерти",
+            "example": "2015-04-18"
+          },
+          {
+            "name": "ddate_mode",
+            "type": "Integer (0 | 1 | 2) [Optional] [Default: 0]",
+            "description": "Режим даты смерти",
+            "example": "1"
+          },
+          {
+            "name": "breed",
+            "type": "Integer(ID) | String [Optional]",
+            "description": "Порода",
+            "example": "Арабская"
+          },
+          {
+            "name": "description",
+            "type": "String | max=500 [Optional]",
+            "description": "Описание",
+            "example": "Прыгает 1.20"
+          },
+          {
+            "name": "photo",
+            "type": "List [File | Integer(ID)] [Optional]",
+            "description": "Фотографии",
+            "example": "1"
+          }
+        ],
+        "responses": [
+          {
+            "name": "200 OK",
+            "examples": [
+              {
+                "id": 86,
+                "name": "Юпитер",
+                "breed": {
+                  "id": 11,
+                  "name": "Арабская"
+                },
+                "sex": 2,
+                "bdate": "2000-03-29",
+                "ddate": "2015-04-18",
+                "description": "Прыгает 1.20",
+                "children": [],
+                "bdate_mode": 2,
+                "ddate_mode": 1,
+                "mother": null,
+                "father": null,
+                "created_at": "2025-07-27T09:21:49.666961+03:00",
+                "created_by": {
+                  "first_name": "Администратор",
+                  "last_name": "х",
+                  "patronymic": null
+                },
+                "age": 15,
+                "bdate_formatted": "2000",
+                "ddate_formatted": "04.2015",
+                "photos": [
+                  {
+                    "id": 1,
+                    "image": "{host}/media/photos/tb.jpeg"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "400 Bad Request",
+            "examples": [
+              {
+                "name": [
+                  "Это поле обязательно."
+                ]
+              }
+            ]
+          },
+          {
+            "name": "401 Unauthorized",
+            "examples": [
+              {
+                "detail": "Учетные данные не были предоставлены."
+              },
+              {
+                "detail": "Given token not valid for any token type",
+                "code": "token_not_valid",
+                "messages": [
+                  {
+                    "token_class": "AccessToken",
+                    "token_type": "access",
+                    "message": "Token is invalid"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "403 Forbidden",
+            "examples": [
+              {
+                "detail": "У вас нет прав для выполнения этой операции."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Изменение лошади",
+        "codename": "changehorse",
+        "endpoint": "horse/",
+        "method": "post",
+        "description": "Добавление новой лошади",
+        "permission": "horses.change_horse",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {access_token}"
+          }
+        ],
+        "body": [
+          {
+            "name": "name",
+            "type": "String | max=50 [Required]",
+            "description": "Кличка лошади",
+            "example": "Юпитер"
+          },
+          {
+            "name": "sex",
+            "type": "Integer (0 | 1 | 2) [Optional] [Default: 0]",
+            "description": "Пол лошади",
+            "example": "2"
+          },
+          {
+            "name": "bdate",
+            "type": "Date [Optional] [Format: YYYY-MM-DD]",
+            "description": "Дата рождения",
+            "example": "2000-03-29"
+          },
+          {
+            "name": "bdate_mode",
+            "type": "Integer (0 | 1 | 2) [Optional] [Default: 0]",
+            "description": "Режим даты рождения",
+            "example": "2"
+          },
+          {
+            "name": "ddate",
+            "type": "Date [Optional] [Format: YYYY-MM-DD]",
+            "description": "Дата смерти",
+            "example": "2015-04-18"
+          },
+          {
+            "name": "ddate_mode",
+            "type": "Integer (0 | 1 | 2) [Optional] [Default: 0]",
+            "description": "Режим даты смерти",
+            "example": "1"
+          },
+          {
+            "name": "breed",
+            "type": "Integer(ID) | String [Optional]",
+            "description": "Порода",
+            "example": "Арабская"
+          },
+          {
+            "name": "description",
+            "type": "String | max=500 [Optional]",
+            "description": "Описание",
+            "example": "Прыгает 1.20"
+          }
+        ],
+        "responses": [
+          {
+            "name": "200 OK",
+            "examples": [
+              {
+                "id": 13,
+                "name": "Злак",
+                "breed": {
+                  "id": 1,
+                  "name": "Будёновская"
+                },
+                "sex": 1,
+                "bdate": "2000-07-23",
+                "ddate": null,
+                "description": "Описание",
+                "children": [],
+                "bdate_mode": 1,
+                "ddate_mode": 0,
+                "mother": null,
+                "father": null,
+                "created_at": "2025-07-22T21:02:50.087998+03:00",
+                "created_by": {
+                  "first_name": "модератор",
+                  "last_name": "м",
+                  "patronymic": null
+                },
+                "age": 25,
+                "bdate_formatted": "07.2000",
+                "ddate_formatted": null,
+                "photos": []
+              }
+            ]
+          },
+          {
+            "name": "400 Bad Request",
+            "examples": [
+              {
+                "sex": [
+                  "4 не является корректным значением."
+                ]
+              }
+            ]
+          },
+          {
+            "name": "401 Unauthorized",
+            "examples": [
+              {
+                "detail": "Учетные данные не были предоставлены."
+              },
+              {
+                "detail": "Given token not valid for any token type",
+                "code": "token_not_valid",
+                "messages": [
+                  {
+                    "token_class": "AccessToken",
+                    "token_type": "access",
+                    "message": "Token is invalid"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "403 Forbidden",
+            "examples": [
+              {
+                "detail": "У вас нет прав для выполнения этой операции."
+              }
+            ]
+          },
+          {
+            "name": "404 Not Found"
+          }
+        ]
+      },
+      {
+        "name": "Удаление лошади",
+        "codename": "deletehorse",
+        "endpoint": "horse/{id}/",
+        "method": "delete",
+        "description": "Удаление лошади",
+        "permission": "horses.change_horse",
+        "headers": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {access_token}"
+          }
+        ],
+        "responses": [
+          {
+            "name": "204 No Content"
+          },
+          {
+            "name": "401 Unauthorized",
+            "examples": [
+              {
+                "detail": "Учетные данные не были предоставлены."
+              },
+              {
+                "detail": "Given token not valid for any token type",
+                "code": "token_not_valid",
+                "messages": [
+                  {
+                    "token_class": "AccessToken",
+                    "token_type": "access",
+                    "message": "Token is invalid"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "403 Forbidden",
+            "examples": [
+              {
+                "detail": "У вас нет прав для выполнения этой операции."
+              }
+            ]
+          },
+          {
+            "name": "404 Not Found",
+            "examples": [
+              {
+                "detail": "No Horse matches the given query."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

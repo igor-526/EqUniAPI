@@ -1,0 +1,16 @@
+volumes:
+  eq_pgdata_dev:
+
+services:
+  eq_database_dev:
+    image: postgres:latest
+    ports:
+      - "${DB_PORT_FORWARD}:5432"
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DB}
+      POSTGRES_HOST: localhost
+    volumes:
+      - eq_pgdata_dev:/var/lib/postgresql/data
+    restart: always
