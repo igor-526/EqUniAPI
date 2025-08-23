@@ -9,6 +9,7 @@ from .settings import ALLOW_DOCUMENTATION, DEBUG, MEDIA_ROOT, MEDIA_URL
 api_v1_patterns = [
     path('auth/', include('profile_management.urls')),
     path('horse/', include('horses.urls')),
+    path('gallery/', include('gallery.urls')),
 ]
 
 urlpatterns = [

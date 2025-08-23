@@ -1,4 +1,5 @@
 from django.core.exceptions import ValidationError
+from django.db.models import Count
 
 from gallery.models import Photo
 
@@ -10,7 +11,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Horse
-from .permissions import HorsePedigreePermission, HorsePermission
+from .permissions import HorsePermission, get_has_horses_moderate_permission
 from .serializers import (HorseAdminSerializer,
                           HorseMainInfoSerializer,
                           HorseSerializer)
@@ -21,15 +22,155 @@ class HorseListCreateAPIView(ListCreateAPIView):
     model = Horse
     permission_classes = [HorsePermission]
 
-    def get_serializer_class(self):
-        if (self.request.user.is_authenticated and
-                bool('horses.change_horse' in
-                     self.request.user.get_group_permissions())):
+    def get_serializer_class(self, *args, **kwargs):
+        has_moderate_access = kwargs.get("has_moderate_access", False)
+
+        if has_moderate_access:
             return HorseAdminSerializer
         return HorseSerializer
 
-    def get_queryset(self):
-        return Horse.get_queryset(self.request.query_params)
+    def get_queryset(self, *args, **kwargs):
+        query_params = self.request.query_params
+
+        name = query_params.get('name')
+        sex = query_params.getlist('sex[]')
+        bdate_year_start = query_params.get('bdate_year_start')
+        bdate_year_end = query_params.get('bdate_year_end')
+        ddate_year_start = query_params.get('ddate_year_start')
+        ddate_year_end = query_params.get('ddate_year_end')
+        breeds = query_params.getlist('breed[]')
+        description = query_params.get('description')
+        has_photo = query_params.get('has_photo')
+        children_count = query_params.get('children_count')
+        sort_params = query_params.getlist('sort[]')
+        query_dict = dict()
+        sort_list = list()
+
+        if bdate_year_start:
+            try:
+                bdys = int(bdate_year_start)
+                if bdys > 0:
+                    query_dict['bdate__year__gte'] = bdys
+            except ValueError:
+                pass
+
+        if bdate_year_end:
+            try:
+                bdye = int(bdate_year_end)
+                if bdye > 0:
+                    query_dict['bdate__year__lte'] = bdye
+            except ValueError:
+                pass
+
+        if ddate_year_start:
+            try:
+                ddys = int(ddate_year_start)
+                if ddys > 0:
+                    query_dict['ddate__year__gte'] = ddys
+            except ValueError:
+                pass
+
+        if ddate_year_end:
+            try:
+                ddye = int(ddate_year_end)
+                if ddye > 0:
+                    query_dict['bdate__year__lte'] = ddye
+            except ValueError:
+                pass
+
+        if name is not None:
+            query_dict['name__icontains'] = name
+
+        if sex:
+            query_dict['sex__in'] = sex
+
+        if breeds:
+            breeds_ids = []
+            breeds_names = []
+            for breed in breeds:
+                try:
+                    breeds_ids.append(int(breed))
+                except ValueError:
+                    breeds_names.append(breed)
+            if breeds_ids:
+                query_dict['breed__id__in'] = breeds_ids
+            else:
+                query_dict['breed__name__in'] = breeds_names
+
+        if description:
+            query_dict['description__icontains'] = description
+
+        if has_photo == "true":
+            query_dict['photos_c__gte'] = 1
+        elif has_photo == "false":
+            query_dict['photos_c'] = 0
+
+        if children_count:
+            try:
+                cc = int(children_count)
+                if cc == -1:
+                    query_dict['children_c__gte'] = 1
+                if cc >= 0:
+                    query_dict['children_c'] = cc
+            except ValueError:
+                pass
+
+        if sort_params:
+            for param in sort_params:
+                if param == "breed":
+                    sort_list.append("breed__name")
+                elif param == "-breed":
+                    sort_list.append("-breed__name")
+                elif param in ["name", "-name", "sex", "-sex",
+                               "bdate", "-bdate", "ddate", "-ddate",
+                               "created_at", "-created_at"]:
+                    sort_list.append(param)
+
+        return Horse.objects.annotate(
+            children_c=Count("children"),
+            photos_c=Count("photos")
+        ).filter(**query_dict).order_by(
+            *sort_list
+        )
+
+    def paginate_queryset(self, queryset):
+        query_params = self.request.query_params
+        qp_limit = query_params.get('limit')
+        qp_offset = query_params.get('offset')
+
+        try:
+            qp_limit = int(qp_limit)
+            if qp_limit < 1:
+                qp_limit = 1
+            elif qp_limit > 100:
+                qp_limit = 100
+        except (ValueError, TypeError):
+            qp_limit = 50
+
+        try:
+            qp_offset = int(qp_offset)
+            if qp_offset < 0:
+                qp_offset = 0
+        except (ValueError, TypeError):
+            qp_offset = 0
+
+        return queryset[qp_offset:qp_limit + qp_offset]
+
+    def list(self, request, *args, **kwargs):
+        has_moderate_access = (
+                request.user.is_authenticated and
+                get_has_horses_moderate_permission(request.user)
+        )
+        serializer = self.get_serializer_class(
+            has_moderate_access=has_moderate_access)
+        queryset = self.get_queryset(has_moderate_access=has_moderate_access)
+        count = queryset.count()
+        queryset = self.paginate_queryset(queryset)
+
+        serializer_data = serializer(queryset, many=True,
+                                     context={"request": request}).data
+        return Response(data={"count": count, "items": serializer_data},
+                        status=status.HTTP_200_OK)
 
     def create(self, request: Request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -63,11 +204,22 @@ class HorseDetailAPIView(RetrieveUpdateDestroyAPIView):
         return Horse.objects.all()
 
     def get_serializer_class(self):
-        if (self.request.user.is_authenticated and
-                bool('horses.change_horse' in
-                     self.request.user.get_group_permissions())):
+        has_moderate_access = (
+                self.request.user.is_authenticated and
+                get_has_horses_moderate_permission(self.request.user)
+        )
+        if has_moderate_access:
             return HorseAdminSerializer
         return HorseSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            instance = Horse.objects.get(pk=kwargs['pk'])
+        except Horse.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = self.get_serializer(instance,
+                                         context={"request": request})
+        return Response(serializer.data)
 
     def patch(self, request, *args, **kwargs):
         try:
@@ -75,7 +227,9 @@ class HorseDetailAPIView(RetrieveUpdateDestroyAPIView):
         except Horse.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = self.get_serializer(
-            instance, data=request.data, partial=True)
+            instance, data=request.data,
+            partial=True, context={"request": request}
+        )
         if serializer.is_valid():
             horse = serializer.save()
             if request.data.get("breed") is not None:
@@ -85,7 +239,7 @@ class HorseDetailAPIView(RetrieveUpdateDestroyAPIView):
 
 
 class HorsePedigreeAPIView(APIView):
-    permission_classes = [HorsePedigreePermission]
+    permission_classes = [HorsePermission]
 
     def get_parents_queryset(self, horse: Horse, parent: str = "M"):
         query_dict = dict()

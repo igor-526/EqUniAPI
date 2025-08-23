@@ -4,4 +4,5 @@ __pycache__/
 *.env
 src/media/photos/*
 src/media/profile_photos/*
+src/media/test_photos/*
 src/static/*

@@ -2,8 +2,6 @@ from django.core.validators import (MaxLengthValidator,
                                     MaxValueValidator,
                                     MinValueValidator)
 from django.db import models
-from django.db.models import Count, QuerySet
-from django.http import QueryDict
 from django.utils import timezone
 
 from .validators import validate_future_date
@@ -95,6 +93,33 @@ class Horse(models.Model):
     def __str__(self):
         return self.name
 
+    def get_pedigree(self, count=3, serializer=None):
+        def build_pedigree_tree(horse, current_depth, max_depth):
+            if (horse is None or
+                    serializer is None or
+                    current_depth >= max_depth):
+                return None
+
+            horse_data = serializer(horse).data
+
+            mother = horse.mother
+            father = horse.father
+
+            horse_data['mother'] = build_pedigree_tree(
+                mother, current_depth + 1, max_depth
+            )
+            horse_data['father'] = build_pedigree_tree(
+                father, current_depth + 1, max_depth
+            )
+
+            return horse_data
+
+        pedigree_data = {
+            "mother": build_pedigree_tree(self.mother, 0, count),
+            "father": build_pedigree_tree(self.father, 0, count),
+        }
+        return pedigree_data
+
     def set_breed(self, breed: str):
         if breed == "none":
             self.breed = None
@@ -130,123 +155,6 @@ class Horse(models.Model):
         elif mode == DATE_MODE_CHOICES[2][0]:
             return '%Y'
         return '%d.%m.%Y'
-
-    @staticmethod
-    def get_queryset(query_params: QueryDict, queryset=None) -> QuerySet:
-        name = query_params.get('name')
-        sex = query_params.getlist('sex')
-        bdate_year_start = query_params.get('bdate_year_start')
-        bdate_year_end = query_params.get('bdate_year_end')
-        ddate_year_start = query_params.get('ddate_year_start')
-        ddate_year_end = query_params.get('ddate_year_end')
-        breeds = query_params.getlist('breed')
-        description = query_params.get('description')
-        limit = query_params.get('limit')
-        offset = query_params.get('offset')
-        has_photo = query_params.get('has_photo')
-        children_count = query_params.get('children_count')
-        sort_params = query_params.getlist('sort')
-        query_dict = dict()
-        sort_list = list()
-        if bdate_year_start:
-            try:
-                bdys = int(bdate_year_start)
-                if bdys > 0:
-                    query_dict['bdate__year__gte'] = bdys
-            except ValueError:
-                pass
-        if bdate_year_end:
-            try:
-                bdye = int(bdate_year_end)
-                if bdye > 0:
-                    query_dict['bdate__year__lte'] = bdye
-            except ValueError:
-                pass
-
-        if ddate_year_start:
-            try:
-                ddys = int(ddate_year_start)
-                if ddys > 0:
-                    query_dict['ddate__year__gte'] = ddys
-            except ValueError:
-                pass
-
-        if ddate_year_end:
-            try:
-                ddye = int(ddate_year_end)
-                if ddye > 0:
-                    query_dict['bdate__year__lte'] = ddye
-            except ValueError:
-                pass
-
-        if name is not None:
-            query_dict['name__icontains'] = name
-        if sex:
-            query_dict['sex__in'] = sex
-        if breeds:
-            breeds_ids = []
-            breeds_names = []
-            for breed in breeds:
-                try:
-                    breeds_ids.append(int(breed))
-                except ValueError:
-                    breeds_names.append(breed)
-            if breeds_ids:
-                query_dict['breed__id__in'] = breeds_ids
-            else:
-                query_dict['breed__name__in'] = breeds_names
-        if description:
-            query_dict['description__icontains'] = description
-        if has_photo == "true":
-            query_dict['photos_c__gte'] = 1
-        elif has_photo == "false":
-            query_dict['photos_c'] = 0
-        if children_count:
-            try:
-                cc = int(children_count)
-                if cc == -1:
-                    query_dict['children_c__gte'] = 1
-                if cc >= 0:
-                    query_dict['children_c'] = cc
-            except ValueError:
-                pass
-        if limit is not None:
-            try:
-                limit = int(limit)
-                if limit < 1 or limit > 50:
-                    limit = 50
-            except ValueError:
-                limit = 50
-        else:
-            limit = 50
-        if offset is not None:
-            try:
-                offset = int(offset)
-                if offset < 0:
-                    offset = 0
-            except ValueError:
-                offset = 0
-        else:
-            offset = 0
-        if sort_params:
-            for param in sort_params:
-                if param == "breed":
-                    sort_list.append("breed__name")
-                elif param == "-breed":
-                    sort_list.append("-breed__name")
-                elif param in ["name", "-name", "sex", "-sex",
-                               "bdate", "-bdate", "ddate", "-ddate",
-                               "created_at", "-created_at"]:
-                    sort_list.append(param)
-
-        objects = queryset if queryset else Horse
-
-        return objects.objects.annotate(
-            children_c=Count("children"),
-            photos_c=Count("photos")
-        ).filter(**query_dict).order_by(
-            *sort_list
-        )[offset:offset+limit]
 
     @property
     def mother(self):

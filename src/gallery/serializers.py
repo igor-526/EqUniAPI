@@ -11,7 +11,7 @@ class PhotoCategorySerializer(serializers.ModelSerializer):
         fields = ["id", "name"]
 
 
-class PhotoDetailSerializer(serializers.ModelSerializer):
+class PhotoListAdminSerializer(serializers.ModelSerializer):
     created_by = UserNameOnlySerializer()
     category = PhotoCategorySerializer(many=True)
 
@@ -21,7 +21,15 @@ class PhotoDetailSerializer(serializers.ModelSerializer):
                   "category", "created_at", "created_by"]
 
 
-class PhotoSerializer(serializers.ModelSerializer):
+class PhotoListSerializer(serializers.ModelSerializer):
+    category = PhotoCategorySerializer(many=True)
+
+    class Meta:
+        model = Photo
+        fields = ["title", "description", "image", "category"]
+
+
+class PhotoMainInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Photo
         fields = ["id", "image"]

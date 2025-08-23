@@ -277,55 +277,55 @@
           {
             "name": "name",
             "type": "String [Optional]",
-            "description": "Кличка лошади (фильтр)",
+            "description": "Поиск по кличке. Игнорирует регистр",
             "example": "Юпитер"
           },
           {
-            "name": "sex",
+            "name": "description",
+            "type": "String [Optional]",
+            "description": "Поиск по описанию. Игнорирует регистр",
+            "example": "Юпитер"
+          },
+          {
+            "name": "sex[]",
             "type": "List[Integer (0 | 1 | 2)] [Optional]",
-            "description": "Пол лошади (фильтр)",
+            "description": "Фильтр по полу",
             "example": "2"
           },
           {
             "name": "bdate_year_start",
             "type": "Integer [Format: YYYY] [Optional]",
-            "description": "Дата рождения от (фильтр)",
+            "description": "Фильтр по дате рождения",
             "example": "1990"
           },
           {
             "name": "bdate_year_end",
             "type": "Integer [Format: YYYY] [Optional]",
-            "description": "Дата рождения до (фильтр)",
+            "description": "Фильтр по дате рождения",
             "example": "1990"
           },
           {
             "name": "ddate_year_start",
             "type": "Integer [Format: YYYY] [Optional]",
-            "description": "Дата смерти от (фильтр)",
+            "description": "Фильтр по дате смерти",
             "example": "1990"
           },
           {
             "name": "ddate_year_end",
             "type": "Integer [Format: YYYY] [Optional]",
-            "description": "Дата смерти до (фильтр)",
+            "description": "Фильтр по дате смерти",
             "example": "1990"
           },
           {
-            "name": "breed",
+            "name": "breed[]",
             "type": "List[Integer(ID) | String] [Optional]",
-            "description": "Порода (фильтр)",
+            "description": "Фильтр по ID или наименованию породы",
             "example": "1 | Будёновская"
-          },
-          {
-            "name": "description",
-            "type": "String [Optional]",
-            "description": "Описание",
-            "example": "Безупречный аллюр"
           },
           {
             "name": "has_photo",
             "type": "String ['true'|'false']",
-            "description": "Наличие фотографий",
+            "description": "Фильтр по наличию фотографий",
             "example": "true"
           },
           {
@@ -335,8 +335,14 @@
             "example": "0"
           },
           {
+            "name": "pedigree",
+            "type": "Integer | min=1 | max=5",
+            "description": "Количество выдаваемых поколений и выдача детей",
+            "example": "2"
+          },
+          {
             "name": "limit",
-            "type": "Integer | max=50 [Default=50]",
+            "type": "Integer | max=100 [Default=50]",
             "description": "Количество записей",
             "example": "20"
           },
@@ -371,130 +377,434 @@
           },
           {
             "name": "created_at",
-            "description": "Дата создания записи"
+            "description": "Дата создания записи (только для модераторов)"
           }
         ],
         "responses": [
           {
             "name": "200 OK (Авторизован с правом 'horses.change_horse')",
             "examples": [
-              [
-                {
-                  "id": 15,
-                  "name": "Буря",
-                  "breed": {
-                    "id": 4,
-                    "name": "Ганноверская"
-                  },
-                  "sex": 0,
-                  "bdate": "1973-03-07",
-                  "ddate": null,
-                  "description": "Любит долгие прогулки",
-                  "children": [
-                    {
-                      "id": 47,
-                      "name": "Ульф",
-                      "breed": {
-                        "id": 3,
-                        "name": "Аппалуза"
+              {
+                "count": 200,
+                "items": [
+                  {
+                    "id": 201,
+                    "name": "Шерлок",
+                    "breed": {
+                      "id": 6,
+                      "name": "Морган"
+                    },
+                    "sex": 2,
+                    "bdate": "1988-07-28",
+                    "ddate": null,
+                    "description": "Уравновешенный, редко проявляет нервозность.",
+                    "children": [],
+                    "pedigree": {
+                      "mother": {
+                        "id": 290,
+                        "name": "Агата",
+                        "breed": {
+                          "id": 11,
+                          "name": "Першерон"
+                        },
+                        "sex": 0,
+                        "bdate_formatted": "11.1978",
+                        "ddate_formatted": "1989",
+                        "description": "Любит новые впечатления и смену обстановки.",
+                        "age": 10,
+                        "photos": [
+                          {
+                            "id": 43,
+                            "image": "/media/test_photos/3.jpg"
+                          }
+                        ],
+                        "mother": null,
+                        "father": null
                       },
-                      "sex": 1,
-                      "bdate_formatted": "1972",
-                      "ddate_formatted": "1992",
-                      "description": "Неутомимый труженик",
-                      "age": 20
-                    }
-                  ],
-                  "bdate_mode": 2,
-                  "ddate_mode": 1,
-                  "mother": null,
-                  "father": null,
-                  "created_at": "2025-07-25T12:09:09.275123+03:00",
-                  "created_by": null,
-                  "age": 52,
-                  "bdate_formatted": "1973",
-                  "ddate_formatted": null,
-                  "photos": []
-                },
-                {
-                  "id": 16,
-                  "name": "Гроза",
-                  "breed": {
-                    "id": 5,
-                    "name": "Фризская"
+                      "father": {
+                        "id": 217,
+                        "name": "Агат",
+                        "breed": {
+                          "id": 28,
+                          "name": "Шайр"
+                        },
+                        "sex": 1,
+                        "bdate_formatted": "13.11.1982",
+                        "ddate_formatted": "08.01.2000",
+                        "description": "Подходит для конных квестов.",
+                        "age": 17,
+                        "photos": [
+                          {
+                            "id": 193,
+                            "image": "/media/test_photos/SqPCSR8hxDQ.jpg"
+                          },
+                          {
+                            "id": 185,
+                            "image": "/media/test_photos/rAXvDsxVyog.jpg"
+                          }
+                        ],
+                        "mother": null,
+                        "father": null
+                      }
+                    },
+                    "bdate_mode": 1,
+                    "ddate_mode": 0,
+                    "created_at": "2025-08-23T09:02:27.008370+03:00",
+                    "created_by": null,
+                    "age": 37,
+                    "bdate_formatted": "07.1988",
+                    "ddate_formatted": null,
+                    "photos": [
+                      {
+                        "id": 284,
+                        "image": "/media/test_photos/x_d9211ec4.jpg"
+                      },
+                      {
+                        "id": 200,
+                        "image": "/media/test_photos/TQl-fTSqYGo.jpg"
+                      }
+                    ]
                   },
-                  "sex": 0,
-                  "bdate": "1990-06-26",
-                  "ddate": null,
-                  "description": "Золотистая, как солнце",
-                  "children": [],
-                  "bdate_mode": 1,
-                  "ddate_mode": 1,
-                  "mother": null,
-                  "father": null,
-                  "created_at": "2025-07-25T12:09:09.284454+03:00",
-                  "created_by": null,
-                  "age": 35,
-                  "bdate_formatted": "06.1990",
-                  "ddate_formatted": null,
-                  "photos": []
-                }
-              ]
+                  {
+                    "id": 202,
+                    "name": "Валенсия",
+                    "breed": {
+                      "id": 7,
+                      "name": "Баварская теплокровная"
+                    },
+                    "sex": 0,
+                    "bdate": "1973-01-03",
+                    "ddate": "1994-06-23",
+                    "description": "Обладает сильным характером, но при этом очень преданная.",
+                    "children": [
+                      {
+                        "id": 290,
+                        "name": "Агата",
+                        "breed": {
+                          "id": 11,
+                          "name": "Першерон"
+                        },
+                        "sex": 0,
+                        "bdate_formatted": "11.1978",
+                        "ddate_formatted": "1989",
+                        "description": "Любит новые впечатления и смену обстановки.",
+                        "age": 10,
+                        "photos": [
+                          {
+                            "id": 43,
+                            "image": "/media/test_photos/3.jpg"
+                          }
+                        ]
+                      },
+                      {
+                        "id": 244,
+                        "name": "Айс",
+                        "breed": {
+                          "id": 9,
+                          "name": "Кабардинская"
+                        },
+                        "sex": 1,
+                        "bdate_formatted": "07.1975",
+                        "ddate_formatted": "1992",
+                        "description": "Имеет благородный экстерьер.",
+                        "age": 16,
+                        "photos": [
+                          {
+                            "id": 297,
+                            "image": "/media/test_photos/x_fda2e6e5.jpg"
+                          },
+                          {
+                            "id": 72,
+                            "image": "/media/test_photos/agE1GpRruZs.jpg"
+                          },
+                          {
+                            "id": 57,
+                            "image": "/media/test_photos/7uNoXMSUpcc.jpg"
+                          }
+                        ]
+                      }
+                    ],
+                    "pedigree": {
+                      "mother": {
+                        "id": 370,
+                        "name": "Валенсия",
+                        "breed": {
+                          "id": 19,
+                          "name": "Кладрубская"
+                        },
+                        "sex": 0,
+                        "bdate_formatted": "27.02.1971",
+                        "ddate_formatted": "06.1994",
+                        "description": "Любит играть с мячом и другими игрушками.",
+                        "age": 23,
+                        "photos": [
+                          {
+                            "id": 92,
+                            "image": "/media/test_photos/CnMQJwwDDMk.jpg"
+                          },
+                          {
+                            "id": 21,
+                            "image": "/media/test_photos/1OMXCFP5fU8.jpg"
+                          }
+                        ],
+                        "mother": null,
+                        "father": null
+                      },
+                      "father": {
+                        "id": 368,
+                        "name": "Айс",
+                        "breed": {
+                          "id": 24,
+                          "name": "Орловский рысак"
+                        },
+                        "sex": 1,
+                        "bdate_formatted": "09.01.1970",
+                        "ddate_formatted": "17.12.1993",
+                        "description": "Обладает крепким здоровьем, устойчив к болезням.",
+                        "age": 23,
+                        "photos": [
+                          {
+                            "id": 279,
+                            "image": "/media/test_photos/x_c3f3ca65.jpg"
+                          },
+                          {
+                            "id": 163,
+                            "image": "/media/test_photos/nvqVsUPg10.jpg"
+                          },
+                          {
+                            "id": 140,
+                            "image": "/media/test_photos/jm9qZ8F9cAU.jpg"
+                          },
+                          {
+                            "id": 68,
+                            "image": "/media/test_photos/AaFmVlj6LiQ.jpg"
+                          }
+                        ],
+                        "mother": null,
+                        "father": null
+                      }
+                    },
+                    "bdate_mode": 2,
+                    "ddate_mode": 1,
+                    "created_at": "2025-08-23T09:02:27.024251+03:00",
+                    "created_by": null,
+                    "age": 21,
+                    "bdate_formatted": "1973",
+                    "ddate_formatted": "06.1994",
+                    "photos": [
+                      {
+                        "id": 90,
+                        "image": "/media/test_photos/Cit3ysUsHB4.jpg"
+                      }
+                    ]
+                  }
+                ]
+              }
             ]
           },
           {
             "name": "200 OK (Не авторизован или авторизован без права 'horses.change_horse')",
             "examples": [
-              [
-                {
-                  "id": 15,
-                  "name": "Буря",
-                  "breed": {
-                    "id": 4,
-                    "name": "Ганноверская"
-                  },
-                  "sex": 0,
-                  "description": "Любит долгие прогулки",
-                  "mother": null,
-                  "father": null,
-                  "children": [
-                    {
-                      "id": 47,
-                      "name": "Ульф",
-                      "breed": {
-                        "id": 3,
-                        "name": "Аппалуза"
+              {
+                "count": 200,
+                "items": [
+                  {
+                    "id": 201,
+                    "name": "Шерлок",
+                    "breed": {
+                      "id": 6,
+                      "name": "Морган"
+                    },
+                    "sex": 2,
+                    "description": "Уравновешенный, редко проявляет нервозность.",
+                    "pedigree": {
+                      "mother": {
+                        "id": 290,
+                        "name": "Агата",
+                        "breed": {
+                          "id": 11,
+                          "name": "Першерон"
+                        },
+                        "sex": 0,
+                        "bdate_formatted": "11.1978",
+                        "ddate_formatted": "1989",
+                        "description": "Любит новые впечатления и смену обстановки.",
+                        "age": 10,
+                        "photos": [
+                          {
+                            "id": 43,
+                            "image": "/media/test_photos/3.jpg"
+                          }
+                        ],
+                        "mother": null,
+                        "father": null
                       },
-                      "sex": 1,
-                      "bdate_formatted": "1972",
-                      "ddate_formatted": "1992",
-                      "description": "Неутомимый труженик",
-                      "age": 20
-                    }
-                  ],
-                  "age": 52,
-                  "bdate_formatted": "1973",
-                  "ddate_formatted": null,
-                  "photos": []
-                },
-                {
-                  "id": 16,
-                  "name": "Гроза",
-                  "breed": {
-                    "id": 5,
-                    "name": "Фризская"
+                      "father": {
+                        "id": 217,
+                        "name": "Агат",
+                        "breed": {
+                          "id": 28,
+                          "name": "Шайр"
+                        },
+                        "sex": 1,
+                        "bdate_formatted": "13.11.1982",
+                        "ddate_formatted": "08.01.2000",
+                        "description": "Подходит для конных квестов.",
+                        "age": 17,
+                        "photos": [
+                          {
+                            "id": 193,
+                            "image": "/media/test_photos/SqPCSR8hxDQ.jpg"
+                          },
+                          {
+                            "id": 185,
+                            "image": "/media/test_photos/rAXvDsxVyog.jpg"
+                          }
+                        ],
+                        "mother": null,
+                        "father": null
+                      }
+                    },
+                    "children": [],
+                    "age": 37,
+                    "bdate_formatted": "07.1988",
+                    "ddate_formatted": null,
+                    "photos": [
+                      {
+                        "id": 284,
+                        "image": "/media/test_photos/x_d9211ec4.jpg"
+                      },
+                      {
+                        "id": 200,
+                        "image": "/media/test_photos/TQl-fTSqYGo.jpg"
+                      }
+                    ]
                   },
-                  "sex": 0,
-                  "description": "Золотистая, как солнце",
-                  "mother": null,
-                  "father": null,
-                  "children": [],
-                  "age": 35,
-                  "bdate_formatted": "06.1990",
-                  "ddate_formatted": null,
-                  "photos": []
-                }
-              ]
+                  {
+                    "id": 202,
+                    "name": "Валенсия",
+                    "breed": {
+                      "id": 7,
+                      "name": "Баварская теплокровная"
+                    },
+                    "sex": 0,
+                    "description": "Обладает сильным характером, но при этом очень преданная.",
+                    "pedigree": {
+                      "mother": {
+                        "id": 370,
+                        "name": "Валенсия",
+                        "breed": {
+                          "id": 19,
+                          "name": "Кладрубская"
+                        },
+                        "sex": 0,
+                        "bdate_formatted": "27.02.1971",
+                        "ddate_formatted": "06.1994",
+                        "description": "Любит играть с мячом и другими игрушками.",
+                        "age": 23,
+                        "photos": [
+                          {
+                            "id": 92,
+                            "image": "/media/test_photos/CnMQJwwDDMk.jpg"
+                          },
+                          {
+                            "id": 21,
+                            "image": "/media/test_photos/1OMXCFP5fU8.jpg"
+                          }
+                        ],
+                        "mother": null,
+                        "father": null
+                      },
+                      "father": {
+                        "id": 368,
+                        "name": "Айс",
+                        "breed": {
+                          "id": 24,
+                          "name": "Орловский рысак"
+                        },
+                        "sex": 1,
+                        "bdate_formatted": "09.01.1970",
+                        "ddate_formatted": "17.12.1993",
+                        "description": "Обладает крепким здоровьем, устойчив к болезням.",
+                        "age": 23,
+                        "photos": [
+                          {
+                            "id": 279,
+                            "image": "/media/test_photos/x_c3f3ca65.jpg"
+                          },
+                          {
+                            "id": 163,
+                            "image": "/media/test_photos/nvqVsUPg10.jpg"
+                          },
+                          {
+                            "id": 140,
+                            "image": "/media/test_photos/jm9qZ8F9cAU.jpg"
+                          },
+                          {
+                            "id": 68,
+                            "image": "/media/test_photos/AaFmVlj6LiQ.jpg"
+                          }
+                        ],
+                        "mother": null,
+                        "father": null
+                      }
+                    },
+                    "children": [
+                      {
+                        "id": 290,
+                        "name": "Агата",
+                        "breed": {
+                          "id": 11,
+                          "name": "Першерон"
+                        },
+                        "sex": 0,
+                        "bdate_formatted": "11.1978",
+                        "ddate_formatted": "1989",
+                        "description": "Любит новые впечатления и смену обстановки.",
+                        "age": 10,
+                        "photos": [
+                          {
+                            "id": 43,
+                            "image": "/media/test_photos/3.jpg"
+                          }
+                        ]
+                      },
+                      {
+                        "id": 244,
+                        "name": "Айс",
+                        "breed": {
+                          "id": 9,
+                          "name": "Кабардинская"
+                        },
+                        "sex": 1,
+                        "bdate_formatted": "07.1975",
+                        "ddate_formatted": "1992",
+                        "description": "Имеет благородный экстерьер.",
+                        "age": 16,
+                        "photos": [
+                          {
+                            "id": 297,
+                            "image": "/media/test_photos/x_fda2e6e5.jpg"
+                          },
+                          {
+                            "id": 72,
+                            "image": "/media/test_photos/agE1GpRruZs.jpg"
+                          }
+                        ]
+                      }
+                    ],
+                    "age": 21,
+                    "bdate_formatted": "1973",
+                    "ddate_formatted": "06.1994",
+                    "photos": [
+                      {
+                        "id": 90,
+                        "image": "/media/test_photos/Cit3ysUsHB4.jpg"
+                      }
+                    ]
+                  }
+                ]
+              }
             ]
           }
         ]

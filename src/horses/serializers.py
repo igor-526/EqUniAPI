@@ -1,4 +1,4 @@
-from gallery.serializers import PhotoSerializer
+from gallery.serializers import PhotoMainInfoSerializer
 
 from profile_management.serializers import UserNameOnlySerializer
 
@@ -10,7 +10,7 @@ from .models import Breed, Horse
 class BreedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Breed
-        fields = '__all__'
+        fields = ['id', 'name', 'description']
 
 
 class BreedNameOnlySerializer(serializers.ModelSerializer):
@@ -21,99 +21,94 @@ class BreedNameOnlySerializer(serializers.ModelSerializer):
 
 class HorseMainInfoSerializer(serializers.ModelSerializer):
     breed = BreedNameOnlySerializer(many=False)
-    age = serializers.SerializerMethodField()
-    bdate_formatted = serializers.SerializerMethodField()
-    ddate_formatted = serializers.SerializerMethodField()
+    photos = PhotoMainInfoSerializer(many=True, read_only=True)
 
     class Meta:
         model = Horse
         fields = ["id", "name", "breed", "sex", "bdate_formatted",
-                  "ddate_formatted", "description", "age"]
-
-    def get_age(self, obj: Horse):
-        return obj.age
-
-    def get_bdate_formatted(self, obj: Horse):
-        return obj.bdate_formatted
-
-    def get_ddate_formatted(self, obj: Horse):
-        return obj.ddate_formatted
+                  "ddate_formatted", "description", "age", "photos"]
 
 
 class HorseAdminSerializer(serializers.ModelSerializer):
     created_by = UserNameOnlySerializer(read_only=True)
     breed = BreedNameOnlySerializer(read_only=True)
-    children = HorseMainInfoSerializer(many=True, read_only=True)
-    mother = serializers.SerializerMethodField()
-    father = serializers.SerializerMethodField()
-    age = serializers.SerializerMethodField()
-    bdate_formatted = serializers.SerializerMethodField()
-    ddate_formatted = serializers.SerializerMethodField()
-    photos = PhotoSerializer(many=True, read_only=True)
+    children = serializers.SerializerMethodField()
+    pedigree = serializers.SerializerMethodField()
+    photos = PhotoMainInfoSerializer(many=True, read_only=True)
 
     class Meta:
         model = Horse
         fields = ["id", "name", "breed", "sex", "bdate",
-                  "ddate", "description", "children",
-                  "bdate_mode", "ddate_mode", "mother", "father",
+                  "ddate", "description", "children", "pedigree",
+                  "bdate_mode", "ddate_mode",
                   "created_at", "created_by", "age",
                   "bdate_formatted", "ddate_formatted", "photos"]
 
-    def get_age(self, obj: Horse):
-        return obj.age
-
-    def get_bdate_formatted(self, obj: Horse):
-        return obj.bdate_formatted
-
-    def get_ddate_formatted(self, obj: Horse):
-        return obj.ddate_formatted
-
-    def get_mother(self, obj: Horse):
-        mother = obj.mother
-        if mother is None:
+    def get_pedigree(self, obj: Horse):
+        pedigree = self.context.get('request').query_params.get('pedigree',
+                                                                None)
+        if pedigree is None:
             return None
-        return HorseMainInfoSerializer(mother).data
-
-    def get_father(self, obj: Horse):
-        father = obj.father
-        if father is None:
+        try:
+            pedigree = int(pedigree)
+            if pedigree < 1:
+                pedigree = 1
+            elif pedigree > 5:
+                pedigree = 5
+        except (TypeError, ValueError):
             return None
-        return HorseMainInfoSerializer(father).data
+        return obj.get_pedigree(pedigree, HorseMainInfoSerializer)
+
+    def get_children(self, obj: Horse):
+        pedigree = self.context.get('request').query_params.get('pedigree',
+                                                                None)
+        if pedigree is None:
+            return None
+        try:
+            pedigree = int(pedigree)
+        except (TypeError, ValueError):
+            return None
+        if not pedigree:
+            return None
+        return HorseMainInfoSerializer(obj.children.all(), many=True).data
 
 
 class HorseSerializer(serializers.ModelSerializer):
     breed = BreedNameOnlySerializer(read_only=True)
-    children = HorseMainInfoSerializer(many=True, read_only=True)
-    mother = serializers.SerializerMethodField()
-    father = serializers.SerializerMethodField()
-    age = serializers.SerializerMethodField()
-    bdate_formatted = serializers.SerializerMethodField()
-    ddate_formatted = serializers.SerializerMethodField()
-    photos = PhotoSerializer(many=True, read_only=True)
+    children = serializers.SerializerMethodField()
+    pedigree = serializers.SerializerMethodField()
+    photos = PhotoMainInfoSerializer(many=True, read_only=True)
 
     class Meta:
         model = Horse
         fields = ["id", "name", "breed", "sex",
-                  "description", "mother", "father", "children", "age",
+                  "description", "pedigree", "children", "age",
                   "bdate_formatted", "ddate_formatted", "photos"]
 
-    def get_age(self, obj: Horse):
-        return obj.age
-
-    def get_bdate_formatted(self, obj: Horse):
-        return obj.bdate_formatted
-
-    def get_ddate_formatted(self, obj: Horse):
-        return obj.ddate_formatted
-
-    def get_mother(self, obj: Horse):
-        mother = obj.mother
-        if mother is None:
+    def get_pedigree(self, obj: Horse):
+        pedigree = self.context.get('request').query_params.get('pedigree',
+                                                                None)
+        if pedigree is None:
             return None
-        return HorseMainInfoSerializer(mother).data
-
-    def get_father(self, obj: Horse):
-        father = obj.father
-        if father is None:
+        try:
+            pedigree = int(pedigree)
+            if pedigree < 1:
+                pedigree = 1
+            elif pedigree > 5:
+                pedigree = 5
+        except (TypeError, ValueError):
             return None
-        return HorseMainInfoSerializer(father).data
+        return obj.get_pedigree(pedigree, HorseMainInfoSerializer)
+
+    def get_children(self, obj: Horse):
+        pedigree = self.context.get('request').query_params.get('pedigree',
+                                                                None)
+        if pedigree is None:
+            return None
+        try:
+            pedigree = int(pedigree)
+        except (TypeError, ValueError):
+            return None
+        if not pedigree:
+            return None
+        return HorseMainInfoSerializer(obj.children.all(), many=True).data

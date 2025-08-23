@@ -133,7 +133,7 @@ REST_FRAMEWORK = {
     ],
 }
 
-LANGUAGE_CODE = 'ru-eu'
+LANGUAGE_CODE = 'ru-ru'
 
 TIME_ZONE = 'Europe/Moscow'
 

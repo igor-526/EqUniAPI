@@ -2,7 +2,9 @@ import datetime
 import json
 import random
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List
+
+from gallery.models import Photo
 
 from horses.models import Horse
 
@@ -17,6 +19,7 @@ class FakeHorsesGenerator:
     ddate: datetime.datetime
     ddate_mode: int
     description: str
+    photos_ids: List[int]
 
     def __init__(self):
         self.name = ""
@@ -27,6 +30,9 @@ class FakeHorsesGenerator:
         self.ddate = None
         self.ddate_mode = 0
         self.description = ""
+        self.photos_ids = list(
+            Photo.objects.all().values_list("id", flat=True)
+        )
         fixture_path = (Path(__file__).parent.parent /
                         "fixtures" / "fake_horses.json")
         with open(fixture_path, "r", encoding="UTF-8") as f:
@@ -80,3 +86,21 @@ class FakeHorsesGenerator:
                                  ddate_mode=self.ddate_mode,
                                  description=self.description)
         h.set_breed(self.breed)
+        photos_to_add = []
+        for i in range(random.randint(1, 5)):
+            photos_to_add.append(random.choice(self.photos_ids))
+        h.photos.add(*photos_to_add)
+
+
+def set_fake_horse_parents(horse: Horse):
+    potential_mother = Horse.objects.filter(
+        sex=0, bdate__year__lte=horse.bdate.year
+    ).exclude(id=horse.pk).first()
+    potential_father = Horse.objects.filter(
+        sex__in=[1, 2], bdate__year__lte=horse.bdate.year
+    ).exclude(id=horse.pk).first()
+
+    if potential_mother is not None:
+        potential_mother.children.add(horse.id)
+    if potential_father is not None:
+        potential_father.children.add(horse.id)
