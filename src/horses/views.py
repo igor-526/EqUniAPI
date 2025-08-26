@@ -1,35 +1,29 @@
 from django.core.exceptions import ValidationError
-from django.db.models import Count
+from django.db.models import Count, Prefetch
 
 from gallery.models import Photo
 
-from rest_framework import status
+from rest_framework import status, permissions
 from rest_framework.generics import (ListCreateAPIView,
                                      RetrieveUpdateDestroyAPIView)
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Horse
+from .models import Horse, Breed, HorseOwner
 from .permissions import HorsePermission, get_has_horses_moderate_permission
-from .serializers import (HorseAdminSerializer,
-                          HorseMainInfoSerializer,
-                          HorseSerializer)
-from .validators import validate_child, validate_father, validate_mother
+from .serializers import (HorseMainInfoSerializer,
+                          HorseSerializer, BreedSerializer, BreedNameOnlySerializer, HorseOwnerSerializer,
+                          HorseOwnerNameOnlySerializer)
+from .validators import validate_child, validate_dame, validate_sire
 
 
 class HorseListCreateAPIView(ListCreateAPIView):
     model = Horse
     permission_classes = [HorsePermission]
+    serializer_class = HorseSerializer
 
-    def get_serializer_class(self, *args, **kwargs):
-        has_moderate_access = kwargs.get("has_moderate_access", False)
-
-        if has_moderate_access:
-            return HorseAdminSerializer
-        return HorseSerializer
-
-    def get_queryset(self, *args, **kwargs):
+    def build_query_dict(self, *args, **kwargs):
         query_params = self.request.query_params
 
         name = query_params.get('name')
@@ -42,9 +36,11 @@ class HorseListCreateAPIView(ListCreateAPIView):
         description = query_params.get('description')
         has_photo = query_params.get('has_photo')
         children_count = query_params.get('children_count')
-        sort_params = query_params.getlist('sort[]')
+        kind = query_params.get('kind')
+        has_owner = query_params.get('has_owner')
+        owner = query_params.get('owner[]')
+
         query_dict = dict()
-        sort_list = list()
 
         if bdate_year_start:
             try:
@@ -115,6 +111,24 @@ class HorseListCreateAPIView(ListCreateAPIView):
             except ValueError:
                 pass
 
+        if has_owner == "true":
+            query_dict['owner__isnull'] = False
+        elif has_owner == "false":
+            query_dict['owner__isnull'] = True
+
+        if owner:
+            query_dict['owner__id__in'] = owner
+
+        if kind and kind in ["0", "1", 0, 1]:
+            query_dict['kind'] = int(kind)
+
+        return query_dict
+
+    def get_sort_list(self, *args, **kwargs):
+        query_params = self.request.query_params
+
+        sort_params = query_params.getlist('sort[]')
+        sort_list = list()
         if sort_params:
             for param in sort_params:
                 if param == "breed":
@@ -123,15 +137,31 @@ class HorseListCreateAPIView(ListCreateAPIView):
                     sort_list.append("-breed__name")
                 elif param in ["name", "-name", "sex", "-sex",
                                "bdate", "-bdate", "ddate", "-ddate",
-                               "created_at", "-created_at"]:
+                               "created_at", "-created_at", "kind", "-kind"]:
                     sort_list.append(param)
+        return sort_list
 
-        return Horse.objects.annotate(
-            children_c=Count("children"),
-            photos_c=Count("photos")
-        ).filter(**query_dict).order_by(
-            *sort_list
-        )
+    def get_queryset(self, *args, **kwargs):
+        prefetch_query = ["photos"]
+
+        if self.request.query_params.get("pedigree"):
+            prefetch_children = Prefetch(lookup="children",
+                                         queryset=Horse.objects.select_related('breed').prefetch_related('photos'),
+                                         to_attr="prefetched_children")
+
+            prefetch_parents = Prefetch(lookup="parents",
+                                        queryset=Horse.objects.select_related('breed').prefetch_related('photos'),
+                                        to_attr="prefetched_parents")
+
+            prefetch_query.append(prefetch_children)
+            prefetch_query.append(prefetch_parents)
+
+        queryset = Horse.objects.annotate(
+            children_count=Count("children", distinct=True),
+            photos_count=Count("photos", distinct=True)
+        ).select_related('breed', 'owner').prefetch_related(*prefetch_query)
+
+        return queryset.filter(**self.build_query_dict()).order_by(*self.get_sort_list())
 
     def paginate_queryset(self, queryset):
         query_params = self.request.query_params
@@ -161,64 +191,41 @@ class HorseListCreateAPIView(ListCreateAPIView):
                 request.user.is_authenticated and
                 get_has_horses_moderate_permission(request.user)
         )
-        serializer = self.get_serializer_class(
-            has_moderate_access=has_moderate_access)
         queryset = self.get_queryset(has_moderate_access=has_moderate_access)
         count = queryset.count()
         queryset = self.paginate_queryset(queryset)
 
-        serializer_data = serializer(queryset, many=True,
-                                     context={"request": request}).data
+        serializer_data = self.serializer_class(
+            queryset, many=True,
+            context={"request": request,
+                     "has_moderate_access": has_moderate_access}
+        ).data
         return Response(data={"count": count, "items": serializer_data},
                         status=status.HTTP_200_OK)
-
-    def create(self, request: Request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        horse = serializer.save()
-        horse.created_by = request.user
-        horse.save()
-        try:
-            if request.data.get("breed") is not None:
-                horse.set_breed(request.data.get("breed"))
-            if request.data.getlist("photo"):
-                photos = Photo.get_photos(
-                    request=request,
-                    description=f'Фотография {horse.name}',
-                    categories=["Фотографии лошадей"]
-                )
-                horse.set_photos(photos)
-        except Exception as ex:
-            horse.delete()
-            return Response(data={"error": str(ex)},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response(data=serializer.data,
-                        status=status.HTTP_201_CREATED)
 
 
 class HorseDetailAPIView(RetrieveUpdateDestroyAPIView):
     model = Horse
     permission_classes = [HorsePermission]
+    serializer_class = HorseSerializer
 
     def get_queryset(self):
         return Horse.objects.all()
-
-    def get_serializer_class(self):
-        has_moderate_access = (
-                self.request.user.is_authenticated and
-                get_has_horses_moderate_permission(self.request.user)
-        )
-        if has_moderate_access:
-            return HorseAdminSerializer
-        return HorseSerializer
 
     def retrieve(self, request, *args, **kwargs):
         try:
             instance = Horse.objects.get(pk=kwargs['pk'])
         except Horse.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        serializer = self.get_serializer(instance,
-                                         context={"request": request})
+        has_moderate_access = (
+                request.user.is_authenticated and
+                get_has_horses_moderate_permission(request.user)
+        )
+        serializer = self.serializer_class(
+            instance,
+            context={"request": request,
+                     "has_moderate_access": has_moderate_access}
+        )
         return Response(serializer.data)
 
     def patch(self, request, *args, **kwargs):
@@ -226,9 +233,12 @@ class HorseDetailAPIView(RetrieveUpdateDestroyAPIView):
             instance = Horse.objects.get(pk=kwargs['pk'])
         except Horse.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        serializer = self.get_serializer(
-            instance, data=request.data,
-            partial=True, context={"request": request}
+        serializer = self.serializer_class(
+            instance,
+            data=request.data,
+            partial=True,
+            context={"request": request,
+                     "has_moderate_access": True}
         )
         if serializer.is_valid():
             horse = serializer.save()
@@ -291,10 +301,10 @@ class HorsePedigreeAPIView(APIView):
 
     def post(self, request, *args, **kwargs):
         mode = kwargs.get('mode')
-        if mode not in ["mother", "father", "children"]:
+        if mode not in ["sire", "dame", "children"]:
             return Response(
                 data={
-                    "error": "Режим может быть только mother, father, children"
+                    "error": "Режим может быть только sire, dame, children"
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
@@ -315,7 +325,7 @@ class HorsePedigreeAPIView(APIView):
                 )
             ped_horses = [Horse.objects.get(id=int(horse)) for
                           horse in ped_horses]
-            if mode in ['mother', 'father'] and len(ped_horses) > 1:
+            if mode in ['sire', 'dame'] and len(ped_horses) > 1:
                 return Response(
                     data={"error": "Невозможно установить более 1 родителя"},
                     status=status.HTTP_400_BAD_REQUEST
@@ -332,12 +342,12 @@ class HorsePedigreeAPIView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
         try:
-            if mode == "mother":
-                validate_mother(horse, ped_horses[0])
+            if mode == "sire":
+                validate_sire(horse, ped_horses[0])
                 ped_horses[0].children.add(horse)
                 ped_horses[0].save()
-            if mode == "father":
-                validate_father(horse, ped_horses[0])
+            if mode == "dame":
+                validate_dame(horse, ped_horses[0])
                 ped_horses[0].children.add(horse)
                 ped_horses[0].save()
             if mode == 'children':
@@ -347,35 +357,47 @@ class HorsePedigreeAPIView(APIView):
         except ValidationError as ex:
             return Response(data={"error": ex.message},
                             status=status.HTTP_400_BAD_REQUEST)
-        return Response(data=HorseAdminSerializer(instance=horse).data,
-                        status=status.HTTP_200_OK)
+        return Response(
+            data=HorseSerializer(instance=horse,
+                                 context={"request": self.request,
+                                          "has_moderate_access": True}).data,
+            status=status.HTTP_200_OK
+        )
 
     def delete(self, request, *args, **kwargs):
         mode = kwargs.get('mode')
-        if mode not in ["mother", "father", "children"]:
+        if mode not in ["sire", "dame", "children"]:
             return Response(
                 data={
-                    "error": "Режим может быть только mother, father, children"
+                    "error": "Режим может быть только sire, dame, children"
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
         try:
             horse = Horse.objects.get(pk=kwargs['pk'])
         except Horse.DoesNotExist:
-            return Response(data={"error": "Лошадь не найдена"},
-                            status=status.HTTP_404_NOT_FOUND)
-        if mode == "mother":
-            mother = horse.mother
-            if mother is None:
-                return Response(data={"error": "У лошади отсутствует мать"})
-            mother.children.remove(horse)
-            mother.save()
-        elif mode == "father":
-            father = horse.father
-            if father is None:
-                return Response(data={"error": "У лошади отсутствует отец"})
-            father.children.remove(horse)
-            father.save()
+            return Response(
+                data={"error": "Лошадь не найдена"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        if mode == "sire":
+            sire = horse.get_sire()
+            if sire is None:
+                return Response(
+                    data={"error": "У лошади отсутствует мать"},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            sire.children.remove(horse)
+            sire.save()
+        elif mode == "dame":
+            dame = horse.get_dame()
+            if dame is None:
+                return Response(
+                    data={"error": "У лошади отсутствует отец"},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            dame.children.remove(horse)
+            dame.save()
         elif mode == 'children':
             try:
                 ped_horses = request.POST.getlist("ped_horses")
@@ -401,5 +423,188 @@ class HorsePedigreeAPIView(APIView):
                     status=status.HTTP_404_NOT_FOUND
                 )
             horse.children.remove(*ped_horses)
-        return Response(data=HorseAdminSerializer(horse).data,
+        return Response(
+            data=HorseSerializer(horse,
+                                 context={"request": self.request,
+                                          "has_moderate_access": True}).data,
+            status=status.HTTP_200_OK
+        )
+
+
+class HorsePhotosAPIView(APIView):
+    pass
+
+
+class BreedListCreateAPIView(ListCreateAPIView):
+    model = Horse
+    permission_classes = [HorsePermission]
+
+    def get_serializer_class(self):
+        if (self.request.query_params.get("full") == "true" or
+                self.request.method == "POST"):
+            return BreedSerializer
+        return BreedNameOnlySerializer
+
+    def build_query_dict(self, *args, **kwargs):
+        query_params = self.request.query_params
+
+        name = query_params.get('name')
+        description = query_params.get('description')
+
+        query_dict = dict()
+
+        if name is not None:
+            query_dict['name__icontains'] = name
+
+        if description:
+            query_dict['description__icontains'] = description
+
+        return query_dict
+
+    def get_sort_list(self, *args, **kwargs):
+        query_params = self.request.query_params
+
+        sort_params = query_params.getlist('sort[]')
+        sort_list = list()
+        if sort_params:
+            for param in sort_params:
+                if param in ["name", "-name"]:
+                    sort_list.append(param)
+        return sort_list
+
+    def get_queryset(self):
+        queryset = Breed.objects.filter(**self.build_query_dict()).order_by(*self.get_sort_list())
+        return queryset
+
+    def paginate_queryset(self, queryset):
+        query_params = self.request.query_params
+        qp_limit = query_params.get('limit')
+        qp_offset = query_params.get('offset')
+
+        try:
+            qp_limit = int(qp_limit)
+            if qp_limit < 1:
+                qp_limit = 1
+            elif qp_limit > 1000:
+                qp_limit = 1000
+        except (ValueError, TypeError):
+            qp_limit = 200
+
+        try:
+            qp_offset = int(qp_offset)
+            if qp_offset < 0:
+                qp_offset = 0
+        except (ValueError, TypeError):
+            qp_offset = 0
+
+        return queryset[qp_offset:qp_limit + qp_offset]
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        count = queryset.count()
+        queryset = self.paginate_queryset(queryset)
+        serializer = self.get_serializer_class()
+
+        serializer_data = serializer(queryset, many=True).data
+        return Response(data={"count": count, "items": serializer_data},
                         status=status.HTTP_200_OK)
+
+
+class BreedDetailAPIView(RetrieveUpdateDestroyAPIView):
+    model = Horse
+    permission_classes = [HorsePermission]
+    serializer_class = BreedSerializer
+
+    def get_queryset(self):
+        return Breed.objects.all()
+
+
+class HorseOwnersListCreateAPIView(ListCreateAPIView):
+    permission_classes = [HorsePermission]
+    serializer_class = HorseSerializer
+
+    def get_serializer_class(self):
+        if (self.request.query_params.get("full") == "true" or
+                self.request.method == "POST"):
+            return HorseOwnerSerializer
+        return HorseOwnerNameOnlySerializer
+
+    def build_query_dict(self, *args, **kwargs):
+        query_params = self.request.query_params
+
+        search_name = query_params.get('name')
+        search_description = query_params.get('description')
+        filter_type = query_params.getlist('type[]')
+        search_address = query_params.get('address')
+
+        query_dict = dict()
+
+        if search_name is not None:
+            query_dict['name__icontains'] = search_name
+
+        if search_description:
+            query_dict['description__icontains'] = search_description
+
+        if filter_type:
+            query_dict['type__in'] = filter_type
+
+        if search_address:
+            query_dict['address__icontains'] = search_address
+
+        return query_dict
+
+    def get_sort_list(self, *args, **kwargs):
+        query_params = self.request.query_params
+
+        sort_params = query_params.getlist('sort[]')
+        sort_list = list()
+        if sort_params:
+            for param in sort_params:
+                if param in ["name", "-name", "address", "-address"]:
+                    sort_list.append(param)
+        return sort_list
+
+    def get_queryset(self):
+        queryset = HorseOwner.objects.filter(**self.build_query_dict()).order_by(*self.get_sort_list())
+        return queryset
+
+    def paginate_queryset(self, queryset):
+        query_params = self.request.query_params
+        qp_limit = query_params.get('limit')
+        qp_offset = query_params.get('offset')
+
+        try:
+            qp_limit = int(qp_limit)
+            if qp_limit < 1:
+                qp_limit = 1
+            elif qp_limit > 1000:
+                qp_limit = 1000
+        except (ValueError, TypeError):
+            qp_limit = 200
+
+        try:
+            qp_offset = int(qp_offset)
+            if qp_offset < 0:
+                qp_offset = 0
+        except (ValueError, TypeError):
+            qp_offset = 0
+
+        return queryset[qp_offset:qp_limit + qp_offset]
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        count = queryset.count()
+        queryset = self.paginate_queryset(queryset)
+        serializer = self.get_serializer_class()
+
+        serializer_data = serializer(queryset, many=True).data
+        return Response(data={"count": count, "items": serializer_data},
+                        status=status.HTTP_200_OK)
+
+
+class HorseOwnersDetailAPIView(RetrieveUpdateDestroyAPIView):
+    permission_classes = [HorsePermission]
+    serializer_class = HorseOwnerSerializer
+
+    def get_queryset(self):
+        return HorseOwner.objects.all()

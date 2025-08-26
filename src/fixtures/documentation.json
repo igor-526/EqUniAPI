@@ -223,6 +223,20 @@
         ]
       },
       {
+        "name": "kind",
+        "description": "тип породы",
+        "values": [
+          {
+            "key": "0",
+            "value": "Лошадь"
+          },
+          {
+            "key": "1",
+            "value": "Пони"
+          }
+        ]
+      },
+      {
         "name": "bdate_mode",
         "description": "режим даты рождения лошади",
         "values": [
@@ -263,7 +277,7 @@
       {
         "name": "Все лошади",
         "codename": "allhorses",
-        "endpoint": "horse/",
+        "endpoint": "horses/",
         "method": "get",
         "description": "Список всех лошадей",
         "permission": "horses.change_horse (для получения расширенной информации)",
@@ -341,6 +355,24 @@
             "example": "2"
           },
           {
+            "name": "has_owner",
+            "type": "String ['true'|'false']",
+            "description": "Фильтр по наличию владельца",
+            "example": "true"
+          },
+          {
+            "name": "owner[]",
+            "type": "List[Integer(ID)] [Optional]",
+            "description": "Фильтр по ID владельца",
+            "example": "1"
+          },
+          {
+            "name": "kind",
+            "type": "Integer (0 | 1) [Optional]",
+            "description": "Фильтр по типу породы",
+            "example": "1"
+          },
+          {
             "name": "limit",
             "type": "Integer | max=100 [Default=50]",
             "description": "Количество записей",
@@ -368,6 +400,10 @@
             "description": "Порода"
           },
           {
+            "name": "kind",
+            "description": "Тип породы"
+          },
+          {
             "name": "bdate",
             "description": "Дата рождения"
           },
@@ -385,86 +421,71 @@
             "name": "200 OK (Авторизован с правом 'horses.change_horse')",
             "examples": [
               {
-                "count": 200,
+                "count": 3,
                 "items": [
                   {
-                    "id": 201,
-                    "name": "Шерлок",
+                    "id": 402,
+                    "name": "Тест кличка",
                     "breed": {
-                      "id": 6,
-                      "name": "Морган"
+                      "id": 31,
+                      "name": "Тест порода"
                     },
-                    "sex": 2,
-                    "bdate": "1988-07-28",
-                    "ddate": null,
-                    "description": "Уравновешенный, редко проявляет нервозность.",
-                    "children": [],
-                    "pedigree": {
-                      "mother": {
-                        "id": 290,
-                        "name": "Агата",
-                        "breed": {
-                          "id": 11,
-                          "name": "Першерон"
-                        },
-                        "sex": 0,
-                        "bdate_formatted": "11.1978",
-                        "ddate_formatted": "1989",
-                        "description": "Любит новые впечатления и смену обстановки.",
-                        "age": 10,
-                        "photos": [
-                          {
-                            "id": 43,
-                            "image": "/media/test_photos/3.jpg"
-                          }
-                        ],
-                        "mother": null,
-                        "father": null
-                      },
-                      "father": {
-                        "id": 217,
-                        "name": "Агат",
-                        "breed": {
-                          "id": 28,
-                          "name": "Шайр"
-                        },
-                        "sex": 1,
-                        "bdate_formatted": "13.11.1982",
-                        "ddate_formatted": "08.01.2000",
-                        "description": "Подходит для конных квестов.",
-                        "age": 17,
-                        "photos": [
-                          {
-                            "id": 193,
-                            "image": "/media/test_photos/SqPCSR8hxDQ.jpg"
-                          },
-                          {
-                            "id": 185,
-                            "image": "/media/test_photos/rAXvDsxVyog.jpg"
-                          }
-                        ],
-                        "mother": null,
-                        "father": null
-                      }
+                    "sex": 1,
+                    "description": "Тест описание",
+                    "age": 15,
+                    "kind": 1,
+                    "owner": {
+                      "id": 1,
+                      "name": "Александрова дача"
                     },
-                    "bdate_mode": 1,
+                    "bdate_formatted": "15.05.1985",
+                    "ddate_formatted": "20.08.2000",
+                    "photos": [],
+                    "bdate": "1985-05-15",
+                    "ddate": "2000-08-20",
+                    "bdate_mode": 0,
                     "ddate_mode": 0,
-                    "created_at": "2025-08-23T09:02:27.008370+03:00",
-                    "created_by": null,
-                    "age": 37,
-                    "bdate_formatted": "07.1988",
-                    "ddate_formatted": null,
-                    "photos": [
-                      {
-                        "id": 284,
-                        "image": "/media/test_photos/x_d9211ec4.jpg"
-                      },
-                      {
-                        "id": 200,
-                        "image": "/media/test_photos/TQl-fTSqYGo.jpg"
-                      }
-                    ]
+                    "created_at": "2025-08-25T17:31:37.087739Z",
+                    "created_by": {
+                      "first_name": "",
+                      "last_name": "",
+                      "patronymic": ""
+                    }
                   },
+                  {
+                    "id": 403,
+                    "name": "Тест кличка",
+                    "breed": {
+                      "id": 31,
+                      "name": "Тест порода"
+                    },
+                    "sex": 1,
+                    "description": "Тест описание",
+                    "age": 15,
+                    "kind": 1,
+                    "owner": {
+                      "id": 2,
+                      "name": "КСК Вива"
+                    },
+                    "bdate_formatted": "15.05.1985",
+                    "ddate_formatted": "20.08.2000",
+                    "photos": [],
+                    "bdate": "1985-05-15",
+                    "ddate": "2000-08-20",
+                    "bdate_mode": 0,
+                    "ddate_mode": 0,
+                    "created_at": "2025-08-25T17:35:45.646611Z",
+                    "created_by": {
+                      "first_name": "",
+                      "last_name": "",
+                      "patronymic": ""
+                    }
+                  }
+                ]
+              },
+              {
+                "count": 204,
+                "items": [
                   {
                     "id": 202,
                     "name": "Валенсия",
@@ -473,9 +494,80 @@
                       "name": "Баварская теплокровная"
                     },
                     "sex": 0,
+                    "description": "Обладает сильным характером, но при этом очень преданная.",
+                    "age": 21,
+                    "kind": 0,
+                    "owner": null,
+                    "bdate_formatted": "1973",
+                    "ddate_formatted": "06.1994",
+                    "photos": [
+                      {
+                        "id": 90,
+                        "image": "http://localhost:8009/media/test_photos/Cit3ysUsHB4.jpg"
+                      }
+                    ],
                     "bdate": "1973-01-03",
                     "ddate": "1994-06-23",
-                    "description": "Обладает сильным характером, но при этом очень преданная.",
+                    "bdate_mode": 2,
+                    "ddate_mode": 1,
+                    "created_at": "2025-08-23T06:02:27.024251Z",
+                    "created_by": {
+                      "first_name": "",
+                      "last_name": "",
+                      "patronymic": ""
+                    },
+                    "pedigree": {
+                      "sire": {
+                        "id": 370,
+                        "name": "Валенсия",
+                        "breed": {
+                          "id": 19,
+                          "name": "Кладрубская"
+                        },
+                        "sex": 0,
+                        "bdate_formatted": "27.02.1971",
+                        "ddate_formatted": "06.1994",
+                        "description": "Любит играть с мячом и другими игрушками.",
+                        "age": 23,
+                        "photos": [
+                          {
+                            "id": 92,
+                            "image": "/media/test_photos/CnMQJwwDDMk.jpg"
+                          },
+                          {
+                            "id": 21,
+                            "image": "/media/test_photos/1OMXCFP5fU8.jpg"
+                          }
+                        ]
+                      },
+                      "dame": {
+                        "id": 368,
+                        "name": "Айс",
+                        "breed": {
+                          "id": 24,
+                          "name": "Орловский рысак"
+                        },
+                        "sex": 1,
+                        "bdate_formatted": "09.01.1970",
+                        "ddate_formatted": "17.12.1993",
+                        "description": "Обладает крепким здоровьем, устойчив к болезням.",
+                        "age": 23,
+                        "photos": [
+                          {
+                            "id": 279,
+                            "image": "/media/test_photos/x_c3f3ca65.jpg"
+                          },
+                          {
+                            "id": 163,
+                            "image": "/media/test_photos/nvqVsUPg10.jpg"
+                          },
+                          {
+                            "id": 140,
+                            "image": "/media/test_photos/jm9qZ8F9cAU.jpg"
+                          }
+                        ]
+                      }
+                    },
                     "children": [
                       {
                         "id": 290,
@@ -523,79 +615,6 @@
                           }
                         ]
                       }
-                    ],
-                    "pedigree": {
-                      "mother": {
-                        "id": 370,
-                        "name": "Валенсия",
-                        "breed": {
-                          "id": 19,
-                          "name": "Кладрубская"
-                        },
-                        "sex": 0,
-                        "bdate_formatted": "27.02.1971",
-                        "ddate_formatted": "06.1994",
-                        "description": "Любит играть с мячом и другими игрушками.",
-                        "age": 23,
-                        "photos": [
-                          {
-                            "id": 92,
-                            "image": "/media/test_photos/CnMQJwwDDMk.jpg"
-                          },
-                          {
-                            "id": 21,
-                            "image": "/media/test_photos/1OMXCFP5fU8.jpg"
-                          }
-                        ],
-                        "mother": null,
-                        "father": null
-                      },
-                      "father": {
-                        "id": 368,
-                        "name": "Айс",
-                        "breed": {
-                          "id": 24,
-                          "name": "Орловский рысак"
-                        },
-                        "sex": 1,
-                        "bdate_formatted": "09.01.1970",
-                        "ddate_formatted": "17.12.1993",
-                        "description": "Обладает крепким здоровьем, устойчив к болезням.",
-                        "age": 23,
-                        "photos": [
-                          {
-                            "id": 279,
-                            "image": "/media/test_photos/x_c3f3ca65.jpg"
-                          },
-                          {
-                            "id": 163,
-                            "image": "/media/test_photos/nvqVsUPg10.jpg"
-                          },
-                          {
-                            "id": 140,
-                            "image": "/media/test_photos/jm9qZ8F9cAU.jpg"
-                          },
-                          {
-                            "id": 68,
-                            "image": "/media/test_photos/AaFmVlj6LiQ.jpg"
-                          }
-                        ],
-                        "mother": null,
-                        "father": null
-                      }
-                    },
-                    "bdate_mode": 2,
-                    "ddate_mode": 1,
-                    "created_at": "2025-08-23T09:02:27.024251+03:00",
-                    "created_by": null,
-                    "age": 21,
-                    "bdate_formatted": "1973",
-                    "ddate_formatted": "06.1994",
-                    "photos": [
-                      {
-                        "id": 90,
-                        "image": "/media/test_photos/Cit3ysUsHB4.jpg"
-                      }
                     ]
                   }
                 ]
@@ -606,80 +625,51 @@
             "name": "200 OK (Не авторизован или авторизован без права 'horses.change_horse')",
             "examples": [
               {
-                "count": 200,
+                "count": 3,
                 "items": [
                   {
-                    "id": 201,
-                    "name": "Шерлок",
+                    "id": 402,
+                    "name": "Тест кличка",
                     "breed": {
-                      "id": 6,
-                      "name": "Морган"
+                      "id": 31,
+                      "name": "Тест порода"
                     },
-                    "sex": 2,
-                    "description": "Уравновешенный, редко проявляет нервозность.",
-                    "pedigree": {
-                      "mother": {
-                        "id": 290,
-                        "name": "Агата",
-                        "breed": {
-                          "id": 11,
-                          "name": "Першерон"
-                        },
-                        "sex": 0,
-                        "bdate_formatted": "11.1978",
-                        "ddate_formatted": "1989",
-                        "description": "Любит новые впечатления и смену обстановки.",
-                        "age": 10,
-                        "photos": [
-                          {
-                            "id": 43,
-                            "image": "/media/test_photos/3.jpg"
-                          }
-                        ],
-                        "mother": null,
-                        "father": null
-                      },
-                      "father": {
-                        "id": 217,
-                        "name": "Агат",
-                        "breed": {
-                          "id": 28,
-                          "name": "Шайр"
-                        },
-                        "sex": 1,
-                        "bdate_formatted": "13.11.1982",
-                        "ddate_formatted": "08.01.2000",
-                        "description": "Подходит для конных квестов.",
-                        "age": 17,
-                        "photos": [
-                          {
-                            "id": 193,
-                            "image": "/media/test_photos/SqPCSR8hxDQ.jpg"
-                          },
-                          {
-                            "id": 185,
-                            "image": "/media/test_photos/rAXvDsxVyog.jpg"
-                          }
-                        ],
-                        "mother": null,
-                        "father": null
-                      }
+                    "sex": 1,
+                    "description": "Тест описание",
+                    "age": 15,
+                    "kind": 1,
+                    "owner": {
+                      "id": 1,
+                      "name": "Александрова дача"
                     },
-                    "children": [],
-                    "age": 37,
-                    "bdate_formatted": "07.1988",
-                    "ddate_formatted": null,
-                    "photos": [
-                      {
-                        "id": 284,
-                        "image": "/media/test_photos/x_d9211ec4.jpg"
-                      },
-                      {
-                        "id": 200,
-                        "image": "/media/test_photos/TQl-fTSqYGo.jpg"
-                      }
-                    ]
+                    "bdate_formatted": "15.05.1985",
+                    "ddate_formatted": "20.08.2000",
+                    "photos": []
                   },
+                  {
+                    "id": 403,
+                    "name": "Тест кличка",
+                    "breed": {
+                      "id": 31,
+                      "name": "Тест порода"
+                    },
+                    "sex": 1,
+                    "description": "Тест описание",
+                    "age": 15,
+                    "kind": 1,
+                    "owner": {
+                      "id": 2,
+                      "name": "КСК Вива"
+                    },
+                    "bdate_formatted": "15.05.1985",
+                    "ddate_formatted": "20.08.2000",
+                    "photos": []
+                  }
+                ]
+              },
+              {
+                "count": 204,
+                "items": [
                   {
                     "id": 202,
                     "name": "Валенсия",
@@ -689,8 +679,19 @@
                     },
                     "sex": 0,
                     "description": "Обладает сильным характером, но при этом очень преданная.",
+                    "age": 21,
+                    "kind": 0,
+                    "owner": null,
+                    "bdate_formatted": "1973",
+                    "ddate_formatted": "06.1994",
+                    "photos": [
+                      {
+                        "id": 90,
+                        "image": "http://localhost:8009/media/test_photos/Cit3ysUsHB4.jpg"
+                      }
+                    ],
                     "pedigree": {
-                      "mother": {
+                      "sire": {
                         "id": 370,
                         "name": "Валенсия",
                         "breed": {
@@ -711,11 +712,9 @@
                             "id": 21,
                             "image": "/media/test_photos/1OMXCFP5fU8.jpg"
                           }
-                        ],
-                        "mother": null,
-                        "father": null
+                        ]
                       },
-                      "father": {
+                      "dame": {
                         "id": 368,
                         "name": "Айс",
                         "breed": {
@@ -744,9 +743,7 @@
                             "id": 68,
                             "image": "/media/test_photos/AaFmVlj6LiQ.jpg"
                           }
-                        ],
-                        "mother": null,
-                        "father": null
+                        ]
                       }
                     },
                     "children": [
@@ -789,17 +786,12 @@
                           {
                             "id": 72,
                             "image": "/media/test_photos/agE1GpRruZs.jpg"
+                          },
+                          {
+                            "id": 57,
+                            "image": "/media/test_photos/7uNoXMSUpcc.jpg"
                           }
                         ]
-                      }
-                    ],
-                    "age": 21,
-                    "bdate_formatted": "1973",
-                    "ddate_formatted": "06.1994",
-                    "photos": [
-                      {
-                        "id": 90,
-                        "image": "/media/test_photos/Cit3ysUsHB4.jpg"
                       }
                     ]
                   }
@@ -812,7 +804,7 @@
       {
         "name": "Одна лошадь",
         "codename": "onehorses",
-        "endpoint": "horse/{id}/",
+        "endpoint": "horses/{id}/",
         "method": "get",
         "description": "Данные о конкретной лошади",
         "permission": "horses.change_horse (для получения расширенной информации)",
@@ -822,46 +814,177 @@
             "value": "Bearer {access_token}"
           }
         ],
+        "query_params": [
+          {
+            "name": "pedigree",
+            "type": "Integer | min=1 | max=5",
+            "description": "Количество выдаваемых поколений и выдача детей",
+            "example": "2"
+          }
+        ],
         "responses": [
           {
             "name": "200 OK (Авторизован с правом 'horses.change_horse')",
             "examples": [
               {
-                "id": 15,
-                "name": "Буря",
+                "id": 402,
+                "name": "Тест кличка",
                 "breed": {
-                  "id": 4,
-                  "name": "Ганноверская"
+                  "id": 31,
+                  "name": "Тест порода"
+                },
+                "sex": 1,
+                "description": "Тест описание",
+                "age": 15,
+                "kind": 1,
+                "owner": {
+                  "id": 1,
+                  "name": "Александрова дача"
+                },
+                "bdate_formatted": "15.05.1985",
+                "ddate_formatted": "20.08.2000",
+                "photos": [],
+                "bdate": "1985-05-15",
+                "ddate": "2000-08-20",
+                "bdate_mode": 0,
+                "ddate_mode": 0,
+                "created_at": "2025-08-25T17:31:37.087739Z",
+                "created_by": {
+                  "first_name": "",
+                  "last_name": "",
+                  "patronymic": ""
+                }
+              },
+              {
+                "id": 202,
+                "name": "Валенсия",
+                "breed": {
+                  "id": 7,
+                  "name": "Баварская теплокровная"
                 },
                 "sex": 0,
-                "bdate": "1973-03-07",
-                "ddate": null,
-                "description": "Любит долгие прогулки",
-                "children": [
+                "description": "Обладает сильным характером, но при этом очень преданная.",
+                "age": 21,
+                "kind": 0,
+                "owner": null,
+                "bdate_formatted": "1973",
+                "ddate_formatted": "06.1994",
+                "photos": [
                   {
-                    "id": 47,
-                    "name": "Ульф",
-                    "breed": {
-                      "id": 3,
-                      "name": "Аппалуза"
-                    },
-                    "sex": 1,
-                    "bdate_formatted": "1972",
-                    "ddate_formatted": "1992",
-                    "description": "Неутомимый труженик",
-                    "age": 20
+                    "id": 90,
+                    "image": "http://localhost:8009/media/test_photos/Cit3ysUsHB4.jpg"
                   }
                 ],
+                "bdate": "1973-01-03",
+                "ddate": "1994-06-23",
                 "bdate_mode": 2,
                 "ddate_mode": 1,
-                "mother": null,
-                "father": null,
-                "created_at": "2025-07-25T12:09:09.275123+03:00",
-                "created_by": null,
-                "age": 52,
-                "bdate_formatted": "1973",
-                "ddate_formatted": null,
-                "photos": []
+                "created_at": "2025-08-23T06:02:27.024251Z",
+                "created_by": {
+                  "first_name": "",
+                  "last_name": "",
+                  "patronymic": ""
+                },
+                "pedigree": {
+                  "sire": {
+                    "id": 370,
+                    "name": "Валенсия",
+                    "breed": {
+                      "id": 19,
+                      "name": "Кладрубская"
+                    },
+                    "sex": 0,
+                    "bdate_formatted": "27.02.1971",
+                    "ddate_formatted": "06.1994",
+                    "description": "Любит играть с мячом и другими игрушками.",
+                    "age": 23,
+                    "photos": [
+                      {
+                        "id": 92,
+                        "image": "/media/test_photos/CnMQJwwDDMk.jpg"
+                      },
+                      {
+                        "id": 21,
+                        "image": "/media/test_photos/1OMXCFP5fU8.jpg"
+                      }
+                    ]
+                  },
+                  "dame": {
+                    "id": 368,
+                    "name": "Айс",
+                    "breed": {
+                      "id": 24,
+                      "name": "Орловский рысак"
+                    },
+                    "sex": 1,
+                    "bdate_formatted": "09.01.1970",
+                    "ddate_formatted": "17.12.1993",
+                    "description": "Обладает крепким здоровьем, устойчив к болезням.",
+                    "age": 23,
+                    "photos": [
+                      {
+                        "id": 279,
+                        "image": "/media/test_photos/x_c3f3ca65.jpg"
+                      },
+                      {
+                        "id": 163,
+                        "image": "/media/test_photos/nvqVsUPg10.jpg"
+                      },
+                      {
+                        "id": 140,
+                        "image": "/media/test_photos/jm9qZ8F9cAU.jpg"
+                      }
+                    ]
+                  }
+                },
+                "children": [
+                  {
+                    "id": 290,
+                    "name": "Агата",
+                    "breed": {
+                      "id": 11,
+                      "name": "Першерон"
+                    },
+                    "sex": 0,
+                    "bdate_formatted": "11.1978",
+                    "ddate_formatted": "1989",
+                    "description": "Любит новые впечатления и смену обстановки.",
+                    "age": 10,
+                    "photos": [
+                      {
+                        "id": 43,
+                        "image": "/media/test_photos/3.jpg"
+                      }
+                    ]
+                  },
+                  {
+                    "id": 244,
+                    "name": "Айс",
+                    "breed": {
+                      "id": 9,
+                      "name": "Кабардинская"
+                    },
+                    "sex": 1,
+                    "bdate_formatted": "07.1975",
+                    "ddate_formatted": "1992",
+                    "description": "Имеет благородный экстерьер.",
+                    "age": 16,
+                    "photos": [
+                      {
+                        "id": 297,
+                        "image": "/media/test_photos/x_fda2e6e5.jpg"
+                      },
+                      {
+                        "id": 72,
+                        "image": "/media/test_photos/agE1GpRruZs.jpg"
+                      },
+                      {
+                        "id": 57,
+                        "image": "/media/test_photos/7uNoXMSUpcc.jpg"
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -869,35 +992,148 @@
             "name": "200 OK (Не авторизован или авторизован без права 'horses.change_horse')",
             "examples": [
               {
-                "id": 15,
-                "name": "Буря",
+                "id": 402,
+                "name": "Тест кличка",
                 "breed": {
-                  "id": 4,
-                  "name": "Ганноверская"
+                  "id": 31,
+                  "name": "Тест порода"
+                },
+                "sex": 1,
+                "description": "Тест описание",
+                "age": 15,
+                "kind": 1,
+                "owner": {
+                  "id": 1,
+                  "name": "Александрова дача"
+                },
+                "bdate_formatted": "15.05.1985",
+                "ddate_formatted": "20.08.2000",
+                "photos": []
+              },
+              {
+                "id": 202,
+                "name": "Валенсия",
+                "breed": {
+                  "id": 7,
+                  "name": "Баварская теплокровная"
                 },
                 "sex": 0,
-                "description": "Любит долгие прогулки",
-                "mother": null,
-                "father": null,
-                "children": [
+                "description": "Обладает сильным характером, но при этом очень преданная.",
+                "age": 21,
+                "kind": 0,
+                "owner": null,
+                "bdate_formatted": "1973",
+                "ddate_formatted": "06.1994",
+                "photos": [
                   {
-                    "id": 47,
-                    "name": "Ульф",
-                    "breed": {
-                      "id": 3,
-                      "name": "Аппалуза"
-                    },
-                    "sex": 1,
-                    "bdate_formatted": "1972",
-                    "ddate_formatted": "1992",
-                    "description": "Неутомимый труженик",
-                    "age": 20
+                    "id": 90,
+                    "image": "http://localhost:8009/media/test_photos/Cit3ysUsHB4.jpg"
                   }
                 ],
-                "age": 52,
-                "bdate_formatted": "1973",
-                "ddate_formatted": null,
-                "photos": []
+                "pedigree": {
+                  "sire": {
+                    "id": 370,
+                    "name": "Валенсия",
+                    "breed": {
+                      "id": 19,
+                      "name": "Кладрубская"
+                    },
+                    "sex": 0,
+                    "bdate_formatted": "27.02.1971",
+                    "ddate_formatted": "06.1994",
+                    "description": "Любит играть с мячом и другими игрушками.",
+                    "age": 23,
+                    "photos": [
+                      {
+                        "id": 92,
+                        "image": "/media/test_photos/CnMQJwwDDMk.jpg"
+                      },
+                      {
+                        "id": 21,
+                        "image": "/media/test_photos/1OMXCFP5fU8.jpg"
+                      }
+                    ]
+                  },
+                  "dame": {
+                    "id": 368,
+                    "name": "Айс",
+                    "breed": {
+                      "id": 24,
+                      "name": "Орловский рысак"
+                    },
+                    "sex": 1,
+                    "bdate_formatted": "09.01.1970",
+                    "ddate_formatted": "17.12.1993",
+                    "description": "Обладает крепким здоровьем, устойчив к болезням.",
+                    "age": 23,
+                    "photos": [
+                      {
+                        "id": 279,
+                        "image": "/media/test_photos/x_c3f3ca65.jpg"
+                      },
+                      {
+                        "id": 163,
+                        "image": "/media/test_photos/nvqVsUPg10.jpg"
+                      },
+                      {
+                        "id": 140,
+                        "image": "/media/test_photos/jm9qZ8F9cAU.jpg"
+                      },
+                      {
+                        "id": 68,
+                        "image": "/media/test_photos/AaFmVlj6LiQ.jpg"
+                      }
+                    ]
+                  }
+                },
+                "children": [
+                  {
+                    "id": 290,
+                    "name": "Агата",
+                    "breed": {
+                      "id": 11,
+                      "name": "Першерон"
+                    },
+                    "sex": 0,
+                    "bdate_formatted": "11.1978",
+                    "ddate_formatted": "1989",
+                    "description": "Любит новые впечатления и смену обстановки.",
+                    "age": 10,
+                    "photos": [
+                      {
+                        "id": 43,
+                        "image": "/media/test_photos/3.jpg"
+                      }
+                    ]
+                  },
+                  {
+                    "id": 244,
+                    "name": "Айс",
+                    "breed": {
+                      "id": 9,
+                      "name": "Кабардинская"
+                    },
+                    "sex": 1,
+                    "bdate_formatted": "07.1975",
+                    "ddate_formatted": "1992",
+                    "description": "Имеет благородный экстерьер.",
+                    "age": 16,
+                    "photos": [
+                      {
+                        "id": 297,
+                        "image": "/media/test_photos/x_fda2e6e5.jpg"
+                      },
+                      {
+                        "id": 72,
+                        "image": "/media/test_photos/agE1GpRruZs.jpg"
+                      },
+                      {
+                        "id": 57,
+                        "image": "/media/test_photos/7uNoXMSUpcc.jpg"
+                      }
+                    ]
+                  }
+                ]
               }
             ]
           },
@@ -914,7 +1150,7 @@
       {
         "name": "Добавление лошади",
         "codename": "addhorse",
-        "endpoint": "horse/",
+        "endpoint": "horses/",
         "method": "post",
         "description": "Добавление новой лошади",
         "permission": "horses.change_horse",
@@ -978,10 +1214,22 @@
             "example": "Прыгает 1.20"
           },
           {
-            "name": "photo",
+            "name": "kind",
+            "type": "Integer (0 | 1) [Optional] [Default: 0]",
+            "description": "Тип породы",
+            "example": "1"
+          },
+          {
+            "name": "photos[]",
             "type": "List [File | Integer(ID)] [Optional]",
             "description": "Фотографии",
             "example": "1"
+          },
+          {
+            "name": "owner",
+            "type": "Integer(ID) | String [Optional]",
+            "description": "Владелец",
+            "example": "Иванов Иван Иванович"
           }
         ],
         "responses": [
@@ -989,36 +1237,23 @@
             "name": "200 OK",
             "examples": [
               {
-                "id": 86,
-                "name": "Юпитер",
+                "id": 402,
+                "name": "Тест кличка",
                 "breed": {
-                  "id": 11,
-                  "name": "Арабская"
+                  "id": 31,
+                  "name": "Тест порода"
                 },
-                "sex": 2,
-                "bdate": "2000-03-29",
-                "ddate": "2015-04-18",
-                "description": "Прыгает 1.20",
-                "children": [],
-                "bdate_mode": 2,
-                "ddate_mode": 1,
-                "mother": null,
-                "father": null,
-                "created_at": "2025-07-27T09:21:49.666961+03:00",
-                "created_by": {
-                  "first_name": "Администратор",
-                  "last_name": "х",
-                  "patronymic": null
-                },
+                "sex": 1,
+                "description": "Тест описание",
                 "age": 15,
-                "bdate_formatted": "2000",
-                "ddate_formatted": "04.2015",
-                "photos": [
-                  {
-                    "id": 1,
-                    "image": "{host}/media/photos/tb.jpeg"
-                  }
-                ]
+                "kind": 1,
+                "owner": {
+                  "id": 1,
+                  "name": "Александрова дача"
+                },
+                "bdate_formatted": "15.05.1985",
+                "ddate_formatted": "20.08.2000",
+                "photos": []
               }
             ]
           },
@@ -1064,9 +1299,9 @@
       {
         "name": "Изменение лошади",
         "codename": "changehorse",
-        "endpoint": "horse/",
-        "method": "post",
-        "description": "Добавление новой лошади",
+        "endpoint": "horses/",
+        "method": "patch",
+        "description": "Изменение лошади",
         "permission": "horses.change_horse",
         "headers": [
           {
@@ -1122,6 +1357,12 @@
             "example": "Арабская"
           },
           {
+            "name": "kind",
+            "type": "Integer (0 | 1) [Optional] [Default: 0]",
+            "description": "Тип породы",
+            "example": "1"
+          },
+          {
             "name": "description",
             "type": "String | max=500 [Optional]",
             "description": "Описание",
@@ -1133,30 +1374,22 @@
             "name": "200 OK",
             "examples": [
               {
-                "id": 13,
-                "name": "Злак",
+                "id": 402,
+                "name": "Тест кличка",
                 "breed": {
-                  "id": 1,
-                  "name": "Будёновская"
+                  "id": 31,
+                  "name": "Тест порода"
                 },
                 "sex": 1,
-                "bdate": "2000-07-23",
-                "ddate": null,
-                "description": "Описание",
-                "children": [],
-                "bdate_mode": 1,
-                "ddate_mode": 0,
-                "mother": null,
-                "father": null,
-                "created_at": "2025-07-22T21:02:50.087998+03:00",
-                "created_by": {
-                  "first_name": "модератор",
-                  "last_name": "м",
-                  "patronymic": null
+                "description": "Тест описание",
+                "age": 15,
+                "kind": 1,
+                "owner": {
+                  "id": 1,
+                  "name": "Александрова дача"
                 },
-                "age": 25,
-                "bdate_formatted": "07.2000",
-                "ddate_formatted": null,
+                "bdate_formatted": "15.05.1985",
+                "ddate_formatted": "20.08.2000",
                 "photos": []
               }
             ]
@@ -1206,7 +1439,7 @@
       {
         "name": "Удаление лошади",
         "codename": "deletehorse",
-        "endpoint": "horse/{id}/",
+        "endpoint": "horses/{id}/",
         "method": "delete",
         "description": "Удаление лошади",
         "permission": "horses.change_horse",
@@ -1252,6 +1485,785 @@
             "examples": [
               {
                 "detail": "No Horse matches the given query."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Породы лошадей",
+    "values": [],
+    "endpoints": [
+      {
+        "name": "Все породы",
+        "codename": "allbreeds",
+        "endpoint": "horses/breeds/",
+        "method": "get",
+        "description": "Список всех пород лошадей",
+        "query_params": [
+          {
+            "name": "name",
+            "type": "String [Optional]",
+            "description": "Поиск по наименованию. Игнорирует регистр",
+            "example": "Английская чистокровная"
+          },
+          {
+            "name": "description",
+            "type": "String [Optional]",
+            "description": "Поиск по описанию. Игнорирует регистр",
+            "example": "Не предназначена для конкура"
+          },
+          {
+            "name": "full",
+            "type": "String ['true'|'false']",
+            "description": "Добавляет к ответу описание породы",
+            "example": "true"
+          },
+          {
+            "name": "limit",
+            "type": "Integer | max=1000 [Default=200]",
+            "description": "Количество записей",
+            "example": "20"
+          },
+          {
+            "name": "offset",
+            "type": "Integer [Default=0]",
+            "description": "Отступ записей",
+            "example": "20"
+          }
+
+        ],
+        "sorting": [
+          {
+            "name": "name",
+            "description": "Наименование"
+          }
+        ],
+        "responses": [
+          {
+            "name": "200 OK",
+            "examples": [
+              {
+                "count": 31,
+                "items": [
+                  {
+                    "id": 3,
+                    "name": "Клейдесдаль",
+                    "description": null
+                  },
+                  {
+                    "id": 4,
+                    "name": "Владимирский тяжеловоз",
+                    "description": null
+                  },
+                  {
+                    "id": 5,
+                    "name": "Андалузская",
+                    "description": null
+                  },
+                  {
+                    "id": 6,
+                    "name": "Морган",
+                    "description": null
+                  },
+                  {
+                    "id": 7,
+                    "name": "Баварская теплокровная",
+                    "description": null
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Одна порода",
+        "codename": "onebreed",
+        "endpoint": "horses/breeds/{id}/",
+        "method": "get",
+        "description": "Данные о конкретной породе",
+        "responses": [
+          {
+            "name": "200 OK",
+            "examples": [
+              {
+                "id": 4,
+                "name": "Владимирский тяжеловоз",
+                "description": null
+              }
+            ]
+          },
+          {
+            "name": "404 Not Found",
+            "examples": [
+              {
+                "detail": "No Breed matches the given query."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Добавление породы",
+        "codename": "addbreed",
+        "endpoint": "horses/breeds/",
+        "method": "post",
+        "description": "Добавление новой породы",
+        "permission": "horses.change_horse",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {access_token}"
+          }
+        ],
+        "body": [
+          {
+            "name": "name",
+            "type": "String | max=50 [Required]",
+            "description": "Наименование породы",
+            "example": "Будённовская"
+          },
+          {
+            "name": "description",
+            "type": "String | max=500 [Optional]",
+            "description": "Описание",
+            "example": "Прыгает 1.20"
+          }
+        ],
+        "responses": [
+          {
+            "name": "201 Created",
+            "examples": [
+              {
+                "id": 4,
+                "name": "Владимирский тяжеловоз",
+                "description": null
+              }
+            ]
+          },
+          {
+            "name": "400 Bad Request",
+            "examples": [
+              {
+                "name": [
+                  "Это поле обязательно."
+                ]
+              }
+            ]
+          },
+          {
+            "name": "401 Unauthorized",
+            "examples": [
+              {
+                "detail": "Учетные данные не были предоставлены."
+              },
+              {
+                "detail": "Given token not valid for any token type",
+                "code": "token_not_valid",
+                "messages": [
+                  {
+                    "token_class": "AccessToken",
+                    "token_type": "access",
+                    "message": "Token is invalid"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "403 Forbidden",
+            "examples": [
+              {
+                "detail": "У вас нет прав для выполнения этой операции."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Изменение породы",
+        "codename": "changebreed",
+        "endpoint": "horses/breeds/{id}/",
+        "method": "post",
+        "description": "Изменение породы",
+        "permission": "horses.change_horse",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {access_token}"
+          }
+        ],
+        "body": [
+          {
+            "name": "name",
+            "type": "String | max=50 [Optional]",
+            "description": "Наименование породы",
+            "example": "Будённовская"
+          },
+          {
+            "name": "description",
+            "type": "String | max=500 [Optional]",
+            "description": "Описание",
+            "example": "Прыгает 1.20"
+          }
+        ],
+        "responses": [
+          {
+            "name": "200 OK",
+            "examples": [
+              {
+                "id": 4,
+                "name": "Владимирский тяжеловоз",
+                "description": null
+              }
+            ]
+          },
+          {
+            "name": "400 Bad Request",
+            "examples": [
+              {
+                "name": [
+                  "Это поле обязательно."
+                ]
+              }
+            ]
+          },
+          {
+            "name": "401 Unauthorized",
+            "examples": [
+              {
+                "detail": "Учетные данные не были предоставлены."
+              },
+              {
+                "detail": "Given token not valid for any token type",
+                "code": "token_not_valid",
+                "messages": [
+                  {
+                    "token_class": "AccessToken",
+                    "token_type": "access",
+                    "message": "Token is invalid"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "403 Forbidden",
+            "examples": [
+              {
+                "detail": "У вас нет прав для выполнения этой операции."
+              }
+            ]
+          },
+          {
+            "name": "404 Not Found"
+          }
+        ]
+      },
+      {
+        "name": "Удаление породы",
+        "codename": "deletebreed",
+        "endpoint": "horses/breeds/{id}/",
+        "method": "delete",
+        "description": "Удаление породы лошади",
+        "permission": "horses.change_horse",
+        "headers": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {access_token}"
+          }
+        ],
+        "responses": [
+          {
+            "name": "204 No Content"
+          },
+          {
+            "name": "401 Unauthorized",
+            "examples": [
+              {
+                "detail": "Учетные данные не были предоставлены."
+              },
+              {
+                "detail": "Given token not valid for any token type",
+                "code": "token_not_valid",
+                "messages": [
+                  {
+                    "token_class": "AccessToken",
+                    "token_type": "access",
+                    "message": "Token is invalid"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "403 Forbidden",
+            "examples": [
+              {
+                "detail": "У вас нет прав для выполнения этой операции."
+              }
+            ]
+          },
+          {
+            "name": "404 Not Found",
+            "examples": [
+              {
+                "detail": "No Breed matches the given query."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Владельцы лошадей",
+    "values": [{
+      "name": "type",
+      "description": "тип владельца",
+      "values": [
+        {
+          "key": "0",
+          "value": "Юридическое лицо"
+        },
+        {
+          "key": "1",
+          "value": "Физическое лицо"
+        },
+        {
+          "key": "2",
+          "value": "Неизвестно"
+        }
+      ]
+    }
+    ],
+    "endpoints": [
+      {
+        "name": "Все владельцы",
+        "codename": "allhorseowners",
+        "endpoint": "horses/owners/",
+        "method": "get",
+        "description": "Список всех владельцев лошадей",
+        "query_params": [
+          {
+            "name": "name",
+            "type": "String [Optional]",
+            "description": "Поиск по наименованию. Игнорирует регистр",
+            "example": "КСК"
+          },
+          {
+            "name": "description",
+            "type": "String [Optional]",
+            "description": "Поиск по описанию. Игнорирует регистр",
+            "example": "Аренда"
+          },
+          {
+            "name": "type[]",
+            "type": "List[Integer (0 | 1 | 2)] [Optional]",
+            "description": "Фильтр по типу владельца",
+            "example": "1"
+          },
+          {
+            "name": "address",
+            "type": "String [Optional]",
+            "description": "Поиск по адресу. Игнорирует регистр",
+            "example": "Павловск"
+          },
+          {
+            "name": "full",
+            "type": "String ['true'|'false']",
+            "description": "Добавляет к ответу описание породы",
+            "example": "true"
+          },
+          {
+            "name": "limit",
+            "type": "Integer | max=1000 [Default=200]",
+            "description": "Количество записей",
+            "example": "20"
+          },
+          {
+            "name": "offset",
+            "type": "Integer [Default=0]",
+            "description": "Отступ записей",
+            "example": "20"
+          }
+
+        ],
+        "sorting": [
+          {
+            "name": "name",
+            "description": "Наименование"
+          },
+          {
+            "name": "address",
+            "description": "Адрес"
+          }
+        ],
+        "responses": [
+          {
+            "name": "200 OK",
+            "examples": [
+              {
+                "count": 4,
+                "items": [
+                  {
+                    "id": 4,
+                    "name": "ЦКСК Александрова Дача"
+                  },
+                  {
+                    "id": 5,
+                    "name": "Иванова Дарья Михайловна"
+                  },
+                  {
+                    "id": 2,
+                    "name": "КСК Вива"
+                  }
+                ]
+              },
+              {
+                "count": 4,
+                "items": [
+                  {
+                    "id": 4,
+                    "name": "ЦКСК Александрова Дача",
+                    "description": "Бывшая Генетика",
+                    "type": 0,
+                    "address": "Павловск, ул. Александра Матросова, д. 1А",
+                    "phone_number": [
+                      "+79111234567",
+                      "+79211234567"
+                    ]
+                  },
+                  {
+                    "id": 5,
+                    "name": "Иванова Дарья Михайловна",
+                    "description": "",
+                    "type": 1,
+                    "address": "",
+                    "phone_number": [
+                      "+79111234567"
+                    ]
+                  },
+                  {
+                    "id": 2,
+                    "name": "КСК Вива",
+                    "description": "Вива, конный клуб",
+                    "type": 1,
+                    "address": "Ленинградская область, Гатчинский район, Пудомягское сельское поселение, деревня Порицы",
+                    "phone_number": [
+                      "+79051234567"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Один владелец",
+        "codename": "oneowner",
+        "endpoint": "horses/owners/{id}/",
+        "method": "get",
+        "description": "Данные о конкретном владельце",
+        "responses": [
+          {
+            "name": "200 OK",
+            "examples": [
+              {
+                "id": 4,
+                "name": "ЦКСК Александрова Дача",
+                "description": "Бывшая Генетика",
+                "type": 0,
+                "address": "Павловск, ул. Александра Матросова, д. 1А",
+                "phone_number": [
+                  "+79111234567",
+                  "+79211234567"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "404 Not Found",
+            "examples": [
+              {
+                "detail": "No HorseOwner matches the given query."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Добавление владельца",
+        "codename": "addowner",
+        "endpoint": "horses/owners/",
+        "method": "post",
+        "description": "Добавление нового владельца",
+        "permission": "horses.change_horse",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {access_token}"
+          }
+        ],
+        "body": [
+          {
+            "name": "name",
+            "type": "String | max=150 [Required]",
+            "description": "Наименование",
+            "example": "ЦКСК Александрова Дача"
+          },
+          {
+            "name": "description",
+            "type": "String | max=500 [Optional]",
+            "description": "Описание",
+            "example": "Бывшая Генетика"
+          },
+          {
+            "name": "type",
+            "type": "Integer (0 | 1 | 2) [Optional] [Default: 0]",
+            "description": "Тип",
+            "example": "1"
+          },
+          {
+            "name": "address",
+            "type": "String [Optional] | max=200",
+            "description": "Адрес",
+            "example": "Павловск"
+          },
+          {
+            "name": "phone_number[]",
+            "type": "List[String] [Optional]",
+            "description": "Номер телефона",
+            "example": "+79111234567"
+          }
+        ],
+        "responses": [
+          {
+            "name": "201 Created",
+            "examples": [
+              {
+                "id": 5,
+                "name": "Иванова Дарья Михайловна",
+                "description": "",
+                "type": 1,
+                "address": "",
+                "phone_number": [
+                  "+79111234567"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "400 Bad Request",
+            "examples": [
+              {
+                "name": [
+                  "Это поле обязательно."
+                ]
+              }
+            ]
+          },
+          {
+            "name": "401 Unauthorized",
+            "examples": [
+              {
+                "detail": "Учетные данные не были предоставлены."
+              },
+              {
+                "detail": "Given token not valid for any token type",
+                "code": "token_not_valid",
+                "messages": [
+                  {
+                    "token_class": "AccessToken",
+                    "token_type": "access",
+                    "message": "Token is invalid"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "403 Forbidden",
+            "examples": [
+              {
+                "detail": "У вас нет прав для выполнения этой операции."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Изменение владельца",
+        "codename": "changeowner",
+        "endpoint": "horses/owners/{id}/",
+        "method": "post",
+        "description": "Изменение владельца",
+        "permission": "horses.change_horse",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {access_token}"
+          }
+        ],
+        "body": [
+          {
+            "name": "name",
+            "type": "String | max=150 [Optional]",
+            "description": "Наименование",
+            "example": "ЦКСК Александрова Дача"
+          },
+          {
+            "name": "description",
+            "type": "String | max=500 [Optional]",
+            "description": "Описание",
+            "example": "Бывшая Генетика"
+          },
+          {
+            "name": "type",
+            "type": "Integer (0 | 1 | 2) [Optional] [Default: 0]",
+            "description": "Тип",
+            "example": "1"
+          },
+          {
+            "name": "address",
+            "type": "String [Optional] | max=200",
+            "description": "Адрес",
+            "example": "Павловск"
+          },
+          {
+            "name": "phone_number[]",
+            "type": "List[String] [Optional]",
+            "description": "Номер телефона",
+            "example": "+79111234567"
+          }
+        ],
+        "responses": [
+          {
+            "name": "200 OK",
+            "examples": [
+              {
+                "id": 2,
+                "name": "КСК Вива",
+                "description": "Вива, конный клуб",
+                "type": 1,
+                "address": "Ленинградская область, Гатчинский район, Пудомягское сельское поселение, деревня Порицы",
+                "phone_number": [
+                  "+79051234567"
+                ]
+              }
+            ]
+          },
+          {
+            "name": "400 Bad Request",
+            "examples": [
+              {
+                "name": [
+                  "Это поле обязательно."
+                ]
+              }
+            ]
+          },
+          {
+            "name": "401 Unauthorized",
+            "examples": [
+              {
+                "detail": "Учетные данные не были предоставлены."
+              },
+              {
+                "detail": "Given token not valid for any token type",
+                "code": "token_not_valid",
+                "messages": [
+                  {
+                    "token_class": "AccessToken",
+                    "token_type": "access",
+                    "message": "Token is invalid"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "403 Forbidden",
+            "examples": [
+              {
+                "detail": "У вас нет прав для выполнения этой операции."
+              }
+            ]
+          },
+          {
+            "name": "404 Not Found"
+          }
+        ]
+      },
+      {
+        "name": "Удаление владельца",
+        "codename": "deleteowner",
+        "endpoint": "horses/owners/{id}/",
+        "method": "delete",
+        "description": "Удаление владельца",
+        "permission": "horses.change_horse",
+        "headers": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {access_token}"
+          }
+        ],
+        "responses": [
+          {
+            "name": "204 No Content"
+          },
+          {
+            "name": "401 Unauthorized",
+            "examples": [
+              {
+                "detail": "Учетные данные не были предоставлены."
+              },
+              {
+                "detail": "Given token not valid for any token type",
+                "code": "token_not_valid",
+                "messages": [
+                  {
+                    "token_class": "AccessToken",
+                    "token_type": "access",
+                    "message": "Token is invalid"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "403 Forbidden",
+            "examples": [
+              {
+                "detail": "У вас нет прав для выполнения этой операции."
+              }
+            ]
+          },
+          {
+            "name": "404 Not Found",
+            "examples": [
+              {
+                "detail": "No HorseOwner matches the given query."
               }
             ]
           }

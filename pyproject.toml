@@ -15,6 +15,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "django-debug-toolbar>=6.0.0",
     "flake8>=7.3.0",
     "flake8-import-order>=0.19.2",
     "psycopg2>=2.9.10",

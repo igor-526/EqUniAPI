@@ -69,7 +69,7 @@ class Photo(models.Model):
 
     @staticmethod
     def get_photos(request: Request, description: str = None,
-                   categories: list[str | int] = None, key: str = "photo"):
+                   categories: list[str | int] = None, key: str = "photos[]"):
         photos = request.data.getlist(key)
         result = []
         for photo in photos:

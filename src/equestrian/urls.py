@@ -1,6 +1,7 @@
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+from debug_toolbar.toolbar import debug_toolbar_urls
 
 from documentation.views import DocumentationPage
 
@@ -8,7 +9,7 @@ from .settings import ALLOW_DOCUMENTATION, DEBUG, MEDIA_ROOT, MEDIA_URL
 
 api_v1_patterns = [
     path('auth/', include('profile_management.urls')),
-    path('horse/', include('horses.urls')),
+    path('horses/', include('horses.urls')),
     path('gallery/', include('gallery.urls')),
 ]
 
@@ -25,3 +26,5 @@ if ALLOW_DOCUMENTATION:
 if DEBUG:
     urlpatterns += static(MEDIA_URL,
                           document_root=MEDIA_ROOT)
+    urlpatterns += debug_toolbar_urls()
+

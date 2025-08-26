@@ -13,6 +13,9 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 DEBUG = os.environ.get('DJANGO_DEBUG')
 ALLOWED_HOSTS = [os.environ.get('DJANGO_ALLOWED_HOST')]
 CSRF_TRUSTED_ORIGINS = [f'https://{os.environ.get('DJANGO_ALLOWED_HOST')}']
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -23,12 +26,18 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework_simplejwt',
     'rest_framework',
+
     'profile_management',
     'horses',
     'gallery',
     'service',
     'documentation',
 ]
+
+if DEBUG:
+    INSTALLED_APPS += ['debug_toolbar']
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -39,6 +48,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+if DEBUG:
+    MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
 
 ROOT_URLCONF = 'equestrian.urls'
 

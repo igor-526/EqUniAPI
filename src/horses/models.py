@@ -1,9 +1,12 @@
+from django.core.cache import cache
 from django.core.validators import (MaxLengthValidator,
                                     MaxValueValidator,
-                                    MinValueValidator)
+                                    MinValueValidator, MinLengthValidator)
 from django.db import models
+from django.db.models import Prefetch
 from django.utils import timezone
 
+from gallery.models import Photo
 from .validators import validate_future_date
 
 SEX_CHOICES = [
@@ -18,6 +21,17 @@ DATE_MODE_CHOICES = [
     (2, "Год и месяц"),
 ]
 
+KIND_CHOICES = [
+    (0, "Лошадь"),
+    (1, "Пони"),
+]
+
+HORSE_OWNER_TYPE_CHOICES = [
+    (0, "Юридическое лицо"),
+    (1, "Физическое лицо"),
+    (2, "Неизвестно"),
+]
+
 
 class Horse(models.Model):
     name = models.CharField(verbose_name="Кличка",
@@ -30,6 +44,13 @@ class Horse(models.Model):
                               null=True,
                               blank=True,
                               on_delete=models.SET_NULL)
+    kind = models.PositiveSmallIntegerField(verbose_name="Тип",
+                                            null=False,
+                                            blank=False,
+                                            choices=KIND_CHOICES,
+                                            default=0,
+                                            validators=[MinValueValidator(0),
+                                                        MaxValueValidator(1)])
     sex = models.PositiveSmallIntegerField(verbose_name="Пол",
                                            null=False,
                                            blank=False,
@@ -71,7 +92,12 @@ class Horse(models.Model):
                                       related_name='parents')
     photos = models.ManyToManyField(to="gallery.Photo",
                                     verbose_name="Фотографии",
-                                    related_name='horse')
+                                    related_name='horses')
+    owner = models.ForeignKey(to="horses.HorseOwner",
+                              verbose_name="Владелец",
+                              related_name='horses',
+                              null=True,
+                              on_delete=models.SET_NULL)
     created_at = models.DateTimeField(
         verbose_name="Дата и время добавления лошади",
         auto_now_add=True,
@@ -90,6 +116,14 @@ class Horse(models.Model):
         verbose_name_plural = 'Лошади'
         ordering = ['name']
 
+        indexes = [
+            models.Index(fields=['name']),
+            models.Index(fields=['sex']),
+            models.Index(fields=['bdate']),
+            models.Index(fields=['ddate']),
+            models.Index(fields=['breed']),
+        ]
+
     def __str__(self):
         return self.name
 
@@ -102,21 +136,23 @@ class Horse(models.Model):
 
             horse_data = serializer(horse).data
 
-            mother = horse.mother
-            father = horse.father
+            if current_depth + 1 != max_depth:
+                sire = horse.get_sire(True)
+                dame = horse.get_dame(True)
 
-            horse_data['mother'] = build_pedigree_tree(
-                mother, current_depth + 1, max_depth
-            )
-            horse_data['father'] = build_pedigree_tree(
-                father, current_depth + 1, max_depth
-            )
+                horse_data['sire'] = build_pedigree_tree(
+                    sire, current_depth + 1, max_depth
+                )
+
+                horse_data['dame'] = build_pedigree_tree(
+                    dame, current_depth + 1, max_depth
+                )
 
             return horse_data
 
         pedigree_data = {
-            "mother": build_pedigree_tree(self.mother, 0, count),
-            "father": build_pedigree_tree(self.father, 0, count),
+            "sire": build_pedigree_tree(self.get_sire(), 0, count),
+            "dame": build_pedigree_tree(self.get_dame(), 0, count),
         }
         return pedigree_data
 
@@ -156,13 +192,67 @@ class Horse(models.Model):
             return '%Y'
         return '%d.%m.%Y'
 
-    @property
-    def mother(self):
-        return self.parents.filter(sex=0).first()
+    def get_sire(self, prefetch_parents=False):
+        cache_key = f'horse_{self.id}_sire'
+        sire = cache.get(cache_key)
+        if sire:
+            return sire
 
-    @property
-    def father(self):
-        return self.parents.filter(sex__in=[1, 2]).first()
+        if hasattr(self, 'prefetched_parents'):
+            sire = list(filter(lambda parent: parent.sex == 0, self.prefetched_parents))
+            if sire:
+                cache.set(cache_key, sire[0], timeout=60 * 15)
+                return sire[0]
+            return None
+
+        photos_prefetch = Prefetch(
+            'photos',
+            queryset=Photo.objects.all(),
+            to_attr='prefetched_photos'
+        )
+
+        prefetch = [photos_prefetch]
+
+        if prefetch_parents:
+            prefetch_parents = Prefetch(lookup="parents",
+                                        queryset=Horse.objects.select_related('breed').prefetch_related('photos'),
+                                        to_attr="prefetched_parents")
+            prefetch.append(prefetch_parents)
+
+        sire = self.parents.filter(sex=0).select_related('breed').prefetch_related(*prefetch).first()
+        cache.set(cache_key, sire, timeout=60 * 15)
+        return sire
+
+    def get_dame(self, prefetch_parents=False):
+        cache_key = f'horse_{self.id}_dame'
+        dame = cache.get(cache_key)
+        if dame:
+            return dame
+
+        if hasattr(self, 'prefetched_parents'):
+            dame = list(filter(lambda parent: parent.sex in [1, 2], self.prefetched_parents))
+            if dame:
+                cache.set(cache_key, dame[0], timeout=60 * 15)
+                return dame[0]
+            return None
+
+        photos_prefetch = Prefetch(
+            'photos',
+            queryset=Photo.objects.all(),
+            to_attr='prefetched_photos'
+        )
+
+        prefetch = [photos_prefetch]
+
+        if prefetch_parents:
+            prefetch_parents = Prefetch(lookup="parents",
+                                        queryset=Horse.objects.select_related('breed').prefetch_related('photos'),
+                                        to_attr="prefetched_parents")
+            prefetch.append(prefetch_parents)
+
+        dame = self.parents.filter(sex__in=[1, 2]).select_related('breed').prefetch_related(*prefetch).first()
+        cache.set(cache_key, dame, timeout=60 * 15)
+        return dame
 
     @property
     def age(self):
@@ -185,17 +275,17 @@ class Horse(models.Model):
 
 
 class Breed(models.Model):
-    name = models.CharField(verbose_name="Кличка",
+    name = models.CharField(verbose_name="Наименование",
                             null=False,
                             blank=False,
                             max_length=50,
-                            validators=[MinValueValidator(5),
+                            validators=[MinLengthValidator(5),
                                         MaxLengthValidator(50)])
     description = models.CharField(verbose_name="Описание",
                                    null=True,
                                    blank=True,
                                    max_length=500,
-                                   validators=[MinValueValidator(3),
+                                   validators=[MinLengthValidator(5),
                                                MaxLengthValidator(500)])
 
     class Meta:
@@ -205,3 +295,33 @@ class Breed(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class HorseOwner(models.Model):
+    name = models.CharField(verbose_name="Наименование",
+                            null=False,
+                            blank=False,
+                            max_length=150,
+                            validators=[MaxLengthValidator(150)])
+    description = models.CharField(verbose_name="Описание",
+                                   null=True,
+                                   blank=True,
+                                   max_length=500,
+                                   validators=[MaxLengthValidator(500)])
+    type = models.PositiveSmallIntegerField(verbose_name="Тип",
+                                            null=False,
+                                            blank=False,
+                                            choices=HORSE_OWNER_TYPE_CHOICES,
+                                            default=0,
+                                            validators=[MinValueValidator(0),
+                                                        MaxValueValidator(2)])
+    address = models.CharField(verbose_name="Адрес",
+                               null=True,
+                               blank=True,
+                               max_length=200,
+                               validators=[MaxLengthValidator(200)])
+    phone_number = models.JSONField(verbose_name="Номера телефонов",
+                                    null=True,
+                                    blank=True,
+                                    default=list)
+
