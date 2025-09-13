@@ -12,12 +12,30 @@ load_dotenv()
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 DEBUG = os.environ.get('DJANGO_DEBUG')
 ALLOWED_HOSTS = [os.environ.get('DJANGO_ALLOWED_HOST')]
-CSRF_TRUSTED_ORIGINS = [f'https://{os.environ.get('DJANGO_ALLOWED_HOST')}']
+
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
 INSTALLED_APPS = [
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -37,9 +55,8 @@ INSTALLED_APPS = [
 if DEBUG:
     INSTALLED_APPS += ['debug_toolbar']
 
-
-
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -100,6 +117,20 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 SIMPLE_JWT = {
+    'AUTH_COOKIE': 'access_token',  # Название куки для access token
+    'AUTH_COOKIE_DOMAIN': None,  # Не устанавливать домен для localhost
+    'AUTH_COOKIE_SECURE': not DEBUG,  # True для HTTPS
+    'AUTH_COOKIE_HTTP_ONLY': True,  # Запретить доступ из JS
+    'AUTH_COOKIE_PATH': '/',  # Путь куки
+    'AUTH_COOKIE_SAMESITE': 'Lax',  # Защита от CSRF
+
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'REFRESH_COOKIE_NAME': 'refresh_token',
+    'REFRESH_COOKIE_PATH': '/api/v2/auth/',
+
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=int(os.environ.get("ACCESS_TOKEN_LIFETIME_HOURS", 1))),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=int(os.environ.get("REFRESH_TOKEN_LIFETIME_DAYS", 30))),
     "ROTATE_REFRESH_TOKENS": False,

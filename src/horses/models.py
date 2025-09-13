@@ -1,12 +1,14 @@
 from django.core.cache import cache
 from django.core.validators import (MaxLengthValidator,
                                     MaxValueValidator,
-                                    MinValueValidator, MinLengthValidator)
+                                    MinLengthValidator,
+                                    MinValueValidator)
 from django.db import models
 from django.db.models import Prefetch
 from django.utils import timezone
 
 from gallery.models import Photo
+
 from .validators import validate_future_date
 
 SEX_CHOICES = [
@@ -199,7 +201,8 @@ class Horse(models.Model):
             return sire
 
         if hasattr(self, 'prefetched_parents'):
-            sire = list(filter(lambda parent: parent.sex == 0, self.prefetched_parents))
+            sire = list(filter(lambda parent: parent.sex == 0,
+                               self.prefetched_parents))
             if sire:
                 cache.set(cache_key, sire[0], timeout=60 * 15)
                 return sire[0]
@@ -214,12 +217,17 @@ class Horse(models.Model):
         prefetch = [photos_prefetch]
 
         if prefetch_parents:
-            prefetch_parents = Prefetch(lookup="parents",
-                                        queryset=Horse.objects.select_related('breed').prefetch_related('photos'),
-                                        to_attr="prefetched_parents")
+            prefetch_parents = Prefetch(
+                lookup="parents",
+                queryset=Horse.objects.select_related(
+                    'breed').prefetch_related('photos'),
+                to_attr="prefetched_parents"
+            )
             prefetch.append(prefetch_parents)
 
-        sire = self.parents.filter(sex=0).select_related('breed').prefetch_related(*prefetch).first()
+        sire = self.parents.filter(
+            sex=0
+        ).select_related('breed').prefetch_related(*prefetch).first()
         cache.set(cache_key, sire, timeout=60 * 15)
         return sire
 
@@ -230,7 +238,8 @@ class Horse(models.Model):
             return dame
 
         if hasattr(self, 'prefetched_parents'):
-            dame = list(filter(lambda parent: parent.sex in [1, 2], self.prefetched_parents))
+            dame = list(filter(lambda parent: parent.sex in [1, 2],
+                               self.prefetched_parents))
             if dame:
                 cache.set(cache_key, dame[0], timeout=60 * 15)
                 return dame[0]
@@ -245,12 +254,17 @@ class Horse(models.Model):
         prefetch = [photos_prefetch]
 
         if prefetch_parents:
-            prefetch_parents = Prefetch(lookup="parents",
-                                        queryset=Horse.objects.select_related('breed').prefetch_related('photos'),
-                                        to_attr="prefetched_parents")
+            prefetch_parents = Prefetch(
+                lookup="parents",
+                queryset=Horse.objects.select_related(
+                    'breed').prefetch_related('photos'),
+                to_attr="prefetched_parents"
+            )
             prefetch.append(prefetch_parents)
 
-        dame = self.parents.filter(sex__in=[1, 2]).select_related('breed').prefetch_related(*prefetch).first()
+        dame = self.parents.filter(
+            sex__in=[1, 2]
+        ).select_related('breed').prefetch_related(*prefetch).first()
         cache.set(cache_key, dame, timeout=60 * 15)
         return dame
 
@@ -324,4 +338,3 @@ class HorseOwner(models.Model):
                                     null=True,
                                     blank=True,
                                     default=list)
-

@@ -1,20 +1,20 @@
 from django.core.exceptions import ValidationError
 from django.db.models import Count, Prefetch
 
-from gallery.models import Photo
-
-from rest_framework import status, permissions
+from rest_framework import status
 from rest_framework.generics import (ListCreateAPIView,
                                      RetrieveUpdateDestroyAPIView)
-from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Horse, Breed, HorseOwner
+from .models import Breed, Horse, HorseOwner
 from .permissions import HorsePermission, get_has_horses_moderate_permission
-from .serializers import (HorseMainInfoSerializer,
-                          HorseSerializer, BreedSerializer, BreedNameOnlySerializer, HorseOwnerSerializer,
-                          HorseOwnerNameOnlySerializer)
+from .serializers import (BreedNameOnlySerializer,
+                          BreedSerializer,
+                          HorseMainInfoSerializer,
+                          HorseOwnerNameOnlySerializer,
+                          HorseOwnerSerializer,
+                          HorseSerializer)
 from .validators import validate_child, validate_dame, validate_sire
 
 
@@ -145,13 +145,19 @@ class HorseListCreateAPIView(ListCreateAPIView):
         prefetch_query = ["photos"]
 
         if self.request.query_params.get("pedigree"):
-            prefetch_children = Prefetch(lookup="children",
-                                         queryset=Horse.objects.select_related('breed').prefetch_related('photos'),
-                                         to_attr="prefetched_children")
+            prefetch_children = Prefetch(
+                lookup="children",
+                queryset=Horse.objects.select_related(
+                    'breed').prefetch_related('photos'),
+                to_attr="prefetched_children"
+            )
 
-            prefetch_parents = Prefetch(lookup="parents",
-                                        queryset=Horse.objects.select_related('breed').prefetch_related('photos'),
-                                        to_attr="prefetched_parents")
+            prefetch_parents = Prefetch(
+                lookup="parents",
+                queryset=Horse.objects.select_related(
+                    'breed').prefetch_related('photos'),
+                to_attr="prefetched_parents"
+            )
 
             prefetch_query.append(prefetch_children)
             prefetch_query.append(prefetch_parents)
@@ -161,7 +167,9 @@ class HorseListCreateAPIView(ListCreateAPIView):
             photos_count=Count("photos", distinct=True)
         ).select_related('breed', 'owner').prefetch_related(*prefetch_query)
 
-        return queryset.filter(**self.build_query_dict()).order_by(*self.get_sort_list())
+        return queryset.filter(
+            **self.build_query_dict()
+        ).order_by(*self.get_sort_list())
 
     def paginate_queryset(self, queryset):
         query_params = self.request.query_params
@@ -473,7 +481,9 @@ class BreedListCreateAPIView(ListCreateAPIView):
         return sort_list
 
     def get_queryset(self):
-        queryset = Breed.objects.filter(**self.build_query_dict()).order_by(*self.get_sort_list())
+        queryset = Breed.objects.filter(
+            **self.build_query_dict()
+        ).order_by(*self.get_sort_list())
         return queryset
 
     def paginate_queryset(self, queryset):
@@ -565,7 +575,9 @@ class HorseOwnersListCreateAPIView(ListCreateAPIView):
         return sort_list
 
     def get_queryset(self):
-        queryset = HorseOwner.objects.filter(**self.build_query_dict()).order_by(*self.get_sort_list())
+        queryset = HorseOwner.objects.filter(
+            **self.build_query_dict()
+        ).order_by(*self.get_sort_list())
         return queryset
 
     def paginate_queryset(self, queryset):

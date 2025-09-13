@@ -34,7 +34,6 @@
             "name": "200 OK",
             "examples": [
               {
-                "refresh": "{refresh_token}",
                 "access": "{access_token}"
               }
             ]
@@ -194,6 +193,23 @@
             "examples": [
               {
                 "detail": "Пользователь не найден"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Логаут",
+        "codename": "userlogout",
+        "endpoint": "auth/logout/",
+        "method": "post",
+        "description": "Удаляет refresh token из cookies",
+        "responses": [
+          {
+            "name": "200 OK",
+            "examples": [
+              {
+                "detail": "Successfully logged out"
               }
             ]
           }
