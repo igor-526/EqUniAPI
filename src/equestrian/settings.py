@@ -17,10 +17,12 @@ INTERNAL_IPS = [
     "127.0.0.1",
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
+if os.environ.get('DJANGO_CORS_ALLOWED_ORIGIN', None):
+    CORS_ALLOWED_ORIGINS = [os.environ.get('DJANGO_CORS_ALLOWED_ORIGIN')]
+else:
+    CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -124,10 +126,6 @@ SIMPLE_JWT = {
     'AUTH_COOKIE_PATH': '/',  # Путь куки
     'AUTH_COOKIE_SAMESITE': 'Lax',  # Защита от CSRF
 
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
-    'ROTATE_REFRESH_TOKENS': True,
-    'BLACKLIST_AFTER_ROTATION': True,
     'REFRESH_COOKIE_NAME': 'refresh_token',
     'REFRESH_COOKIE_PATH': '/api/v2/auth/',
 
