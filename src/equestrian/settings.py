@@ -20,8 +20,8 @@ INTERNAL_IPS = [
 if os.environ.get("DJANGO_CORS_ALLOWED_ORIGIN", None):
     CORS_ALLOWED_ORIGINS = [
         os.environ.get("DJANGO_CORS_ALLOWED_ORIGIN"),
-        "http://127.0.0.1:5173",
-        "http://localhost:5173",
+        "http://127.0.0.1:3000",
+        "http://localhost:3000",
     ]
 else:
     CORS_ALLOW_ALL_ORIGINS = True
@@ -65,6 +65,7 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "equestrian.middleware.JWTRefreshMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -128,9 +129,9 @@ SIMPLE_JWT = {
     "AUTH_COOKIE_SECURE": not DEBUG,  # True для HTTPS
     "AUTH_COOKIE_HTTP_ONLY": True,  # Запретить доступ из JS
     "AUTH_COOKIE_PATH": "/",  # Путь куки
-    "AUTH_COOKIE_SAMESITE": "Lax",  # Защита от CSRF
+    "AUTH_COOKIE_SAMESITE": "Lax",  # Защита от CSRF␊
     "REFRESH_COOKIE_NAME": "refresh_token",
-    "REFRESH_COOKIE_PATH": "/api/v2/auth/",
+    "REFRESH_COOKIE_PATH": "/",
     "ACCESS_TOKEN_LIFETIME": timedelta(
         hours=int(os.environ.get("ACCESS_TOKEN_LIFETIME_HOURS", 1))
     ),

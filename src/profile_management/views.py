@@ -1,6 +1,4 @@
-from datetime import datetime
 from django.utils import timezone
-
 from django.conf import settings
 from drf_spectacular.utils import OpenApiResponse, extend_schema, extend_schema_view
 from rest_framework import status
@@ -77,7 +75,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                 path=settings.SIMPLE_JWT["AUTH_COOKIE_PATH"],
             )
             response.set_cookie(
-                key=settings.SIMPLE_JWT["REFRESH_COOKIE"],
+                key=settings.SIMPLE_JWT["REFRESH_COOKIE_NAME"],
                 value=refresh_token,
                 expires=refresh_token_expires,
                 httponly=True,
@@ -92,46 +90,17 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 
 @extend_schema(tags=["Пользователи"])
-class CustomTokenRefreshView(TokenRefreshView):
-    def post(self, request, *args, **kwargs):
-        refresh_token = request.COOKIES.get(settings.SIMPLE_JWT["REFRESH_COOKIE_NAME"])
-
-        if not refresh_token:
-            return Response(
-                {"detail": "Refresh token is missing"},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
-
-        request.data["refresh"] = refresh_token
-        response = super().post(request, *args, **kwargs)
-
-        if response.status_code == 200:
-            access_token = response.data.get("access")
-            new_refresh_token = response.data.get("refresh")
-
-            if new_refresh_token:
-                refresh_token_expires = (
-                    datetime.now() + settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"]
-                )
-                response.set_cookie(
-                    key=settings.SIMPLE_JWT["REFRESH_COOKIE_NAME"],
-                    value=new_refresh_token,
-                    expires=refresh_token_expires,
-                    httponly=True,
-                    secure=not settings.DEBUG,
-                    samesite="Lax",
-                )
-
-            response.data = {"access": access_token}
-
-        return response
-
-
-@extend_schema(tags=["Пользователи"])
 class LogoutView(APIView):
     def post(self, request):
         response = Response({"detail": "Successfully logged out"})
         response.delete_cookie(
-            key=settings.SIMPLE_JWT["REFRESH_COOKIE_NAME"], samesite="Lax"
+            key=settings.SIMPLE_JWT["AUTH_COOKIE"],
+            path=settings.SIMPLE_JWT["AUTH_COOKIE_PATH"],
+            samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
+        )
+        response.delete_cookie(
+            key=settings.SIMPLE_JWT["REFRESH_COOKIE_NAME"],
+            path=settings.SIMPLE_JWT["REFRESH_COOKIE_PATH"],
+            samesite=settings.SIMPLE_JWT["AUTH_COOKIE_SAMESITE"],
         )
         return response
