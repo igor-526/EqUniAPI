@@ -1,6 +1,9 @@
 .venv/
 __pycache__/
 .idea/
+pgdata/
+.next/
+node_modules/
 *.env
 src/media/photos/*
 src/media/profile_photos/*
