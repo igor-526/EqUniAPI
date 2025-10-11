@@ -5,7 +5,7 @@ from horses.utils import set_fake_horse_parents
 
 
 class Command(BaseCommand):
-    help = 'This command will set fake horses pedigree for developing'
+    help = "This command will set fake horses pedigree for developing"
 
     def handle(self, *args, **kwargs):
         try:

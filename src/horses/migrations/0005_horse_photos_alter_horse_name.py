@@ -7,19 +7,25 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('gallery', '0001_initial'),
-        ('horses', '0004_remove_horse_children_horse_children'),
+        ("gallery", "0001_initial"),
+        ("horses", "0004_remove_horse_children_horse_children"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='horse',
-            name='photos',
-            field=models.ManyToManyField(related_name='horse', to='gallery.photo', verbose_name='Фотографии'),
+            model_name="horse",
+            name="photos",
+            field=models.ManyToManyField(
+                related_name="horse", to="gallery.photo", verbose_name="Фотографии"
+            ),
         ),
         migrations.AlterField(
-            model_name='horse',
-            name='name',
-            field=models.CharField(max_length=50, validators=[django.core.validators.MaxLengthValidator(50)], verbose_name='Кличка'),
+            model_name="horse",
+            name="name",
+            field=models.CharField(
+                max_length=50,
+                validators=[django.core.validators.MaxLengthValidator(50)],
+                verbose_name="Кличка",
+            ),
         ),
     ]

@@ -7,21 +7,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('horses', '0001_initial'),
+        ("horses", "0001_initial"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='horse',
-            name='father',
+            model_name="horse",
+            name="father",
         ),
         migrations.RemoveField(
-            model_name='horse',
-            name='mother',
+            model_name="horse",
+            name="mother",
         ),
         migrations.AddField(
-            model_name='horse',
-            name='foals',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='parents', to='horses.horse', verbose_name='Жеребята'),
+            model_name="horse",
+            name="foals",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="parents",
+                to="horses.horse",
+                verbose_name="Жеребята",
+            ),
         ),
     ]

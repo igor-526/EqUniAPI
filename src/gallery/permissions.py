@@ -1,6 +1,6 @@
-from profile_management.models import NewUser
-
 from rest_framework import permissions
+
+from profile_management.models import NewUser
 
 
 class GalleryPermission(permissions.BasePermission):

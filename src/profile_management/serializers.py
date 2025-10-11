@@ -15,8 +15,14 @@ class UserSelfSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = NewUser
-        fields = ["first_name", "last_name", "patronymic",
-                  "photo", "permissions", "groups"]
+        fields = [
+            "first_name",
+            "last_name",
+            "patronymic",
+            "photo",
+            "permissions",
+            "groups",
+        ]
 
     def get_groups(self, obj):
         return list(obj.groups.all().values_list("name", flat=True))

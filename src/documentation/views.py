@@ -9,10 +9,9 @@ class DocumentationPage(TemplateView):
     template_name = "documentation.html"
 
     def get(self, request, *args, **kwargs):
-        fixture_path = (Path(__file__).parent.parent /
-                        "fixtures" / "documentation.json")
+        fixture_path = Path(__file__).parent.parent / "fixtures" / "documentation.json"
         with open(fixture_path, "r", encoding="UTF-8") as f:
             data = json.load(f)
 
-        context = {'doc': data}
+        context = {"doc": data}
         return render(request, self.template_name, context)

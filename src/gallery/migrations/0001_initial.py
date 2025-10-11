@@ -16,32 +16,97 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='PhotoCategory',
+            name="PhotoCategory",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100, validators=[django.core.validators.MaxLengthValidator(100)], verbose_name='Наименование')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(
+                        max_length=100,
+                        validators=[django.core.validators.MaxLengthValidator(100)],
+                        verbose_name="Наименование",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Категория изображений',
-                'verbose_name_plural': 'Категории изображений',
-                'ordering': ['name'],
+                "verbose_name": "Категория изображений",
+                "verbose_name_plural": "Категории изображений",
+                "ordering": ["name"],
             },
         ),
         migrations.CreateModel(
-            name='Photo',
+            name="Photo",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=100, validators=[django.core.validators.MaxLengthValidator(100)], verbose_name='Наименование')),
-                ('description', models.CharField(blank=True, max_length=500, null=True, validators=[django.core.validators.MaxLengthValidator(500)], verbose_name='Описание')),
-                ('image', models.ImageField(upload_to='photos/', verbose_name='Фотография')),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Дата и время добавления фотографии')),
-                ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='gallery_created', to=settings.AUTH_USER_MODEL, verbose_name='Создатель')),
-                ('category', models.ManyToManyField(related_name='photos', to='gallery.photocategory', verbose_name='Категория')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "title",
+                    models.CharField(
+                        max_length=100,
+                        validators=[django.core.validators.MaxLengthValidator(100)],
+                        verbose_name="Наименование",
+                    ),
+                ),
+                (
+                    "description",
+                    models.CharField(
+                        blank=True,
+                        max_length=500,
+                        null=True,
+                        validators=[django.core.validators.MaxLengthValidator(500)],
+                        verbose_name="Описание",
+                    ),
+                ),
+                (
+                    "image",
+                    models.ImageField(upload_to="photos/", verbose_name="Фотография"),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True,
+                        verbose_name="Дата и время добавления фотографии",
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="gallery_created",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Создатель",
+                    ),
+                ),
+                (
+                    "category",
+                    models.ManyToManyField(
+                        related_name="photos",
+                        to="gallery.photocategory",
+                        verbose_name="Категория",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Изображение',
-                'verbose_name_plural': 'Изображения',
-                'ordering': ['-created_at'],
+                "verbose_name": "Изображение",
+                "verbose_name_plural": "Изображения",
+                "ordering": ["-created_at"],
             },
         ),
     ]

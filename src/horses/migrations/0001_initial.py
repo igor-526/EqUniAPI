@@ -2,9 +2,10 @@
 
 import django.core.validators
 import django.db.models.deletion
-import horses.validators
 from django.conf import settings
 from django.db import migrations, models
+
+import horses.validators
 
 
 class Migration(migrations.Migration):
@@ -17,39 +18,199 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Breed',
+            name="Breed",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50, validators=[django.core.validators.MinValueValidator(5), django.core.validators.MaxLengthValidator(50)], verbose_name='Кличка')),
-                ('description', models.CharField(blank=True, max_length=500, null=True, validators=[django.core.validators.MinValueValidator(3), django.core.validators.MaxLengthValidator(500)], verbose_name='Описание')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(
+                        max_length=50,
+                        validators=[
+                            django.core.validators.MinValueValidator(5),
+                            django.core.validators.MaxLengthValidator(50),
+                        ],
+                        verbose_name="Кличка",
+                    ),
+                ),
+                (
+                    "description",
+                    models.CharField(
+                        blank=True,
+                        max_length=500,
+                        null=True,
+                        validators=[
+                            django.core.validators.MinValueValidator(3),
+                            django.core.validators.MaxLengthValidator(500),
+                        ],
+                        verbose_name="Описание",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Порода',
-                'verbose_name_plural': 'Породы',
-                'ordering': ['name'],
+                "verbose_name": "Порода",
+                "verbose_name_plural": "Породы",
+                "ordering": ["name"],
             },
         ),
         migrations.CreateModel(
-            name='Horse',
+            name="Horse",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50, validators=[django.core.validators.MinLengthValidator(1), django.core.validators.MaxLengthValidator(50)], verbose_name='Кличка')),
-                ('sex', models.PositiveSmallIntegerField(choices=[(0, 'Кобыла'), (1, 'Жеребец'), (2, 'Мерин')], default=0, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(2)], verbose_name='Пол')),
-                ('bdate', models.DateField(blank=True, null=True, validators=[horses.validators.validate_future_date], verbose_name='Дата рождения')),
-                ('bdate_mode', models.PositiveSmallIntegerField(choices=[(0, 'Полная дата'), (1, 'Только год'), (2, 'Год и месяц')], default=0, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(2)], verbose_name='Тип даты рождения')),
-                ('ddate', models.DateField(blank=True, null=True, validators=[horses.validators.validate_future_date], verbose_name='Дата смерти')),
-                ('ddate_mode', models.PositiveSmallIntegerField(choices=[(0, 'Полная дата'), (1, 'Только год'), (2, 'Год и месяц')], default=0, validators=[django.core.validators.MinValueValidator(0), django.core.validators.MaxValueValidator(2)], verbose_name='Тип даты смерти')),
-                ('description', models.CharField(blank=True, max_length=500, null=True, validators=[django.core.validators.MaxLengthValidator(500)], verbose_name='Описание')),
-                ('created_at', models.DateTimeField(auto_now_add=True, validators=[horses.validators.validate_future_date], verbose_name='Дата и время добавления лошади')),
-                ('breed', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='horses.breed', verbose_name='Порода')),
-                ('created_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='horses_created', to=settings.AUTH_USER_MODEL, verbose_name='Создатель')),
-                ('father', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='foals_father', to='horses.horse', verbose_name='Отец')),
-                ('mother', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='foals_mother', to='horses.horse', verbose_name='Мать')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(
+                        max_length=50,
+                        validators=[
+                            django.core.validators.MinLengthValidator(1),
+                            django.core.validators.MaxLengthValidator(50),
+                        ],
+                        verbose_name="Кличка",
+                    ),
+                ),
+                (
+                    "sex",
+                    models.PositiveSmallIntegerField(
+                        choices=[(0, "Кобыла"), (1, "Жеребец"), (2, "Мерин")],
+                        default=0,
+                        validators=[
+                            django.core.validators.MinValueValidator(0),
+                            django.core.validators.MaxValueValidator(2),
+                        ],
+                        verbose_name="Пол",
+                    ),
+                ),
+                (
+                    "bdate",
+                    models.DateField(
+                        blank=True,
+                        null=True,
+                        validators=[horses.validators.validate_future_date],
+                        verbose_name="Дата рождения",
+                    ),
+                ),
+                (
+                    "bdate_mode",
+                    models.PositiveSmallIntegerField(
+                        choices=[
+                            (0, "Полная дата"),
+                            (1, "Только год"),
+                            (2, "Год и месяц"),
+                        ],
+                        default=0,
+                        validators=[
+                            django.core.validators.MinValueValidator(0),
+                            django.core.validators.MaxValueValidator(2),
+                        ],
+                        verbose_name="Тип даты рождения",
+                    ),
+                ),
+                (
+                    "ddate",
+                    models.DateField(
+                        blank=True,
+                        null=True,
+                        validators=[horses.validators.validate_future_date],
+                        verbose_name="Дата смерти",
+                    ),
+                ),
+                (
+                    "ddate_mode",
+                    models.PositiveSmallIntegerField(
+                        choices=[
+                            (0, "Полная дата"),
+                            (1, "Только год"),
+                            (2, "Год и месяц"),
+                        ],
+                        default=0,
+                        validators=[
+                            django.core.validators.MinValueValidator(0),
+                            django.core.validators.MaxValueValidator(2),
+                        ],
+                        verbose_name="Тип даты смерти",
+                    ),
+                ),
+                (
+                    "description",
+                    models.CharField(
+                        blank=True,
+                        max_length=500,
+                        null=True,
+                        validators=[django.core.validators.MaxLengthValidator(500)],
+                        verbose_name="Описание",
+                    ),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        auto_now_add=True,
+                        validators=[horses.validators.validate_future_date],
+                        verbose_name="Дата и время добавления лошади",
+                    ),
+                ),
+                (
+                    "breed",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="horses.breed",
+                        verbose_name="Порода",
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="horses_created",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Создатель",
+                    ),
+                ),
+                (
+                    "father",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="foals_father",
+                        to="horses.horse",
+                        verbose_name="Отец",
+                    ),
+                ),
+                (
+                    "mother",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="foals_mother",
+                        to="horses.horse",
+                        verbose_name="Мать",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Лошадь',
-                'verbose_name_plural': 'Лошади',
-                'ordering': ['-created_at'],
+                "verbose_name": "Лошадь",
+                "verbose_name_plural": "Лошади",
+                "ordering": ["-created_at"],
             },
         ),
     ]

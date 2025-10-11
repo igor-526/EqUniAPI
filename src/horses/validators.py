@@ -32,8 +32,9 @@ def validate_sire(child, sire):
             sire_bdate.replace(day=1)
 
         if child_bdate > sire_bdate:
-            raise ValidationError("Дата рождения матери не может быть "
-                                  "больше даты рождения лошади")
+            raise ValidationError(
+                "Дата рождения матери не может быть " "больше даты рождения лошади"
+            )
 
         if sire.ddate:
             sire_ddate = sire.ddate
@@ -48,8 +49,9 @@ def validate_sire(child, sire):
                 sire_ddate.replace(day=1)
 
             if sire_ddate < child_bdate:
-                raise ValidationError("Дата смерти матери не может быть "
-                                      "раньше даты рождения лошади")
+                raise ValidationError(
+                    "Дата смерти матери не может быть " "раньше даты рождения лошади"
+                )
 
 
 def validate_dame(child, dame):
@@ -76,8 +78,9 @@ def validate_dame(child, dame):
             dame_bdate.replace(day=1)
 
         if child_bdate > dame_bdate:
-            raise ValidationError("Дата рождения отца не может быть "
-                                  "больше даты рождения лошади")
+            raise ValidationError(
+                "Дата рождения отца не может быть " "больше даты рождения лошади"
+            )
 
 
 def validate_child(horse, child):
@@ -88,9 +91,9 @@ def validate_child(horse, child):
 
 
 def validate_phone_numbers(phone_list):
-    pattern = r'^(\+7|7|8)?\d{10}$'
+    pattern = r"^(\+7|7|8)?\d{10}$"
     for phone in phone_list:
         if re.match(pattern, phone):
             continue
         else:
-            raise ValidationError(f'{phone} не является номером телефона')
+            raise ValidationError(f"{phone} не является номером телефона")

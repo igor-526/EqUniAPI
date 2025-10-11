@@ -1,6 +1,6 @@
-from profile_management.serializers import UserNameOnlySerializer
-
 from rest_framework import serializers
+
+from profile_management.serializers import UserNameOnlySerializer
 
 from .models import Photo, PhotoCategory
 
@@ -17,8 +17,14 @@ class PhotoListAdminSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Photo
-        fields = ["title", "description", "image",
-                  "category", "created_at", "created_by"]
+        fields = [
+            "title",
+            "description",
+            "image",
+            "category",
+            "created_at",
+            "created_by",
+        ]
 
 
 class PhotoListSerializer(serializers.ModelSerializer):
