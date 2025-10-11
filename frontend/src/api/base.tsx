@@ -8,7 +8,7 @@ interface CustomAxiosInstance extends AxiosInstance {
     ): Promise<R>;
 }
 
-const backendUrl: string = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL : "http://localhost:8009/api/v1"
+const backendUrl: string = "http://localhost:8009/api/v1"
 
 const api: CustomAxiosInstance = axios.create({
     baseURL: backendUrl,

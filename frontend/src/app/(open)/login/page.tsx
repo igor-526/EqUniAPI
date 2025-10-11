@@ -3,15 +3,26 @@
 import {useState} from 'react';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import {Alert, Button, Form, Input} from 'antd';
-import {loginCredentialsType} from "@/types/login";
+import {loginCredentialsType} from "@/types/api/login";
+import authApiLogin from "@/api/auth";
+import { useRouter } from "next/navigation";
 
 
 const LoginPage = () => {
     const [showError, setShowError] = useState(false);
+    const router = useRouter();
 
-    const onFinish = (values: loginCredentialsType) => {
-        console.log(values)
-        setShowError(true)
+    const onFinish = async (loginForm: loginCredentialsType) => {
+        try {
+            const responseData = await authApiLogin(loginForm);
+            if (responseData.status == "ok"){
+                router.push("/dashboard");
+                return
+            }
+            setShowError(true);
+        } catch (error) {
+            setShowError(true);
+        }
     };
 
     return (
