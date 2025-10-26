@@ -18,9 +18,19 @@ const BaseLayout = ({ children }: { children: React.ReactNode }) => {
             onClick: () => {router.push('/')}
         },
         {
+            key: 'users',
+            label: 'Пользователи',
+            onClick: () => {router.push('/users')}
+        },
+        {
             key: 'horses',
             label: 'Лошади',
             onClick: () => {router.push('/horses')}
+        },
+        {
+            key: 'static_information',
+            label: 'Настройки',
+            onClick: () => {router.push('/static_information')}
         },
         {
             key: 'logout',

@@ -13,11 +13,11 @@ services:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
       DJANGO_DEBUG: ${DJANGO_DEBUG}
       DJANGO_ALLOWED_HOST: ${DJANGO_ALLOWED_HOST}
-      DB_HOST: ${DB_HOST}
+      DB_HOST: db
       DB_DB: ${DB_DB}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
-      DB_PORT: ${DB_PORT}
+      DB_PORT: 5432
       ALLOW_DOCUMENTATION: ${ALLOW_DOCUMENTATION}
       ACCESS_TOKEN_LIFETIME_HOURS: ${ACCESS_TOKEN_LIFETIME_HOURS}
       REFRESH_TOKEN_LIFETIME_DAYS: ${REFRESH_TOKEN_LIFETIME_DAYS}
@@ -35,6 +35,8 @@ services:
     container_name: eqapi-db
     env_file:
       - .env
+    expose:
+      - 5432
     ports:
       - "${DB_PORT_FORWARD}:5432"
     environment:

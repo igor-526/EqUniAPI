@@ -7,7 +7,7 @@ const authApiLogin = async (
     credentials: loginCredentialsType
 ): Promise<LoginResponseType> => {
     const response: AxiosResponse<LoginResponseType> = await api.post<LoginResponseType>(
-        "auth/token/",
+        "auth/token",
         {
             username: credentials.username,
             password: credentials.password
