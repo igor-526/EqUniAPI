@@ -17,12 +17,15 @@ INTERNAL_IPS = [
     "127.0.0.1",
 ]
 
-if os.environ.get("DJANGO_CORS_ALLOWED_ORIGIN", None):
-    CORS_ALLOWED_ORIGINS = [
-        os.environ.get("DJANGO_CORS_ALLOWED_ORIGIN"),
+CORS_ALLOWED_ORIGINS = [
         "http://127.0.0.1:3000",
         "http://localhost:3000",
     ]
+
+if os.environ.get("SITE_DOMAIN", None):
+    CORS_ALLOWED_ORIGINS.append(f'https://api.{os.environ.get("SITE_DOMAIN")}')
+    CORS_ALLOWED_ORIGINS.append(f'https://admin.{os.environ.get("SITE_DOMAIN")}')
+    CORS_ALLOWED_ORIGINS.append(f'https://{os.environ.get("SITE_DOMAIN")}')
 else:
     CORS_ALLOW_ALL_ORIGINS = True
 
